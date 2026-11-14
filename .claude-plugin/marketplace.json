@@ -15,7 +15,7 @@
     {
       "name": "gates",
       "source": "./plugins/gates",
-      "description": "Gates that refuse risky Bash commands (pkill, kill by pattern, git add -A, git commit -a) and tell Claude why and what to run instead."
+      "description": "Gates that refuse risky Bash commands (pkill, kill by pattern) and tell Claude why and what to run instead."
     },
     {
       "name": "global-memory",

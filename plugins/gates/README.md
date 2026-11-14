@@ -6,10 +6,10 @@ Gates that refuse risky Bash commands before they run, and tell Claude why and w
 | --- | --- | --- |
 | pkill | any `pkill` | find the one process with `pgrep -f '[g]odot'` and `kill` its PID |
 | kill by pattern | `kill` with `pgrep -f` or `ps \| grep`, unless a letter of that pattern is bracketed (a bracket elsewhere in the command doesn't count) | bracket a letter, so the pattern can't match the Bash tool's own shell |
-| stage everything | `git add -A`, `--all`, `-u`, `--update` or `.` (also `./`, `"."`) | check `git status` and stage files by name |
-| commit everything | `git commit -a` or `--all` | stage by name, then commit without `-a` |
 
-A gate reads each line of a command on its own, as a shell does, and a line that ends in `\` runs on into the next. It catches a command after `cd … &&` or `;`, inside `( … )`, backticks or `sh -c "…"`, git called by path (`/usr/bin/git`), and `git -C dir` with a quoted dir such as `"My Projects/repo"`. Quoted text is one argument, as the shell reads it: a `;` in a commit message doesn't end the command, and a flag named in it, such as `-a`, isn't taken for one. It reads text too, though: a commit message that names a whole refused command, such as one describing these gates, trips it. Every refusal says the way round: put the text in a file and pass the file, `git commit -F FILE`.
+A gate reads each line of a command on its own, as a shell does, and a line that ends in `\` runs on into the next. It catches a command after `cd … &&` or `;`, inside `( … )`, backticks or `sh -c "…"`. It reads text too: a commit message that names `pkill` trips it. Every refusal says the way round: put the text in a file and pass the file, `git commit -F FILE`.
+
+The gates don't refuse any Git command. How you stage and commit belongs in your CLAUDE.md and the repo's own rules.
 
 A gate that fails refuses the command: a broken gate never waves one through. Claude Code skips a failed hook and runs the tool, so the module's `.catch` answers with a refusal in its place.
 

@@ -21,16 +21,6 @@ const LOOKUPS = [
 const unbracketed = (line: string) =>
   LOOKUPS.some(lookup => [...line.matchAll(lookup)].some(match => !/\[[^\]]+\]/.test(match.groups!.lookup)))
 
-// Text in quotes, or an escaped character: the shell reads it as part of one word.
-const QUOTED = String.raw`"(?:\\.|[^"\\])*"|'[^']*'|\\.`
-
-// git, perhaps by path and with -C DIR or -c KEY=VALUE, then a subcommand; the rest of that one
-// command, up to the next ; & or | outside quotes; and where an argument ends, which may also
-// close a subshell or a quoted script such as sh -c "…".
-const GIT = String.raw`(^|[^A-Za-z0-9_.-])git(\s+-[Cc]\s+(${QUOTED}|[^\s"'\\])+)*\s+`
-const REST = String.raw`(?:\s+(?:${QUOTED}|[^;&|"'\\])*)?`
-const END = String.raw`(\s|[;&|)"'\`]|$)`
-
 const GATES: Gate[] = [
   {
     refuses: command => anyLine(command, word('pkill')),
@@ -44,18 +34,6 @@ const GATES: Gate[] = [
     refuses: command => anyLine(command, word('kill')) && lines(command).some(unbracketed),
     reason:
       "This kills its own shell: the Bash tool runs the command as `<shell> -c <command>`, so the pgrep -f or grep pattern matches that shell too. Bracket one letter of the pattern so it still matches the process but not the shell, e.g. pgrep -f '[g]odot' or grep '[g]odot'.",
-  },
-  {
-    // The whole tree may be written ., ./, "." or './'.
-    refuses: command =>
-      anyLine(command, new RegExp(`${GIT}add${REST}\\s(-[A-Za-z]*[Au][A-Za-z]*|--all|--update|["']?\\./?)${END}`)),
-    reason:
-      "git add -A, --all, -u, --update or . stages every change in the tree, including files this task didn't make (captures, scratch output, another session's edits). Check git status, then stage the files this change made by name: git add path/to/file other/file.",
-  },
-  {
-    refuses: command => anyLine(command, new RegExp(`${GIT}commit${REST}\\s(-[A-Za-z]*a[A-Za-z]*|--all)${END}`)),
-    reason:
-      "git commit -a or --all commits every tracked change, including ones this task didn't make. Stage the files this change made by name with git add, then git commit without -a.",
   },
 ]
 
