@@ -8,7 +8,7 @@ A public Claude Code plugin marketplace with ten plugins, each installed on its 
 
 ## The problem
 
-Claude Code's defaults don't fit how the author works. It folds its thinking into "Thought for 4s", runs risky commands like `git add -A` or `pkill`, forgets preferences between projects, doesn't keep GitHub in step with the work, drifts from a project's scope, and pads its writing with hedges and filler. Without the plugins, the author corrects the same things session after session.
+Claude Code's defaults don't fit how the author works. It folds its thinking into "Thought for 4s", runs risky commands like `pkill`, forgets preferences between projects, doesn't keep GitHub in step with the work, drifts from a project's scope, and pads its writing with hedges and filler. Without the plugins, the author corrects the same things session after session.
 
 ## Who it's for
 
@@ -62,6 +62,7 @@ The author: a solo developer on Linux who uses Claude Code for hobby projects. T
 - 2026-11-13: plain-english sets its rules with an output style that turns itself on (`force-for-plugin`), and hands the same text to subagents as SubagentStart context. Why: an output style is Claude Code's own way to set how Claude writes and reaches the main conversation and forks, but a subagent with its own system prompt doesn't get it, and `prompt.compose` doesn't run for one either.
 - 2026-11-13: Added instructions, whose /instructions:init is a fork of the new `/init`'s prompt from Claude Code 2.1.325. It goes against Goal 2 and the non-goal of doing what Claude Code already does, on purpose. Drop its project half once `/init` shows its proposals, and the plugin once `/init` covers the global CLAUDE.md too. Why: `/init` asked "Does this look right?" with no proposal on screen in 2 of the author's runs, because after a tool call Claude writes the text it's told to print before AskUserQuestion only in its thinking (0 of 3 test runs showed it, 3 of 3 when the draft ends the turn). `/init` also has no option for the global `~/.claude/CLAUDE.md`. A `skill.prompt` hook that edits `/init`'s text was turned down: a text replacement breaks silently when the prompt changes, and the global flow is too large to add that way.
 - 2026-11-13: Raised the Python floor for skill scripts and their tests from 3.8 to 3.11, the same as corkboard's. Why: no reason for 3.8 was recorded, its upstream support ended in October 2024, and neither script needs a change.
+- 2026-11-14: Dropped the gates that refused `git add -A` and `git commit -a`. The plugins don't set rules for how to use Git. Why: how the author stages and commits belongs in their CLAUDE.md and each repo's rules, as github-tracking already leaves it (2026-11-10).
 
 ## Open questions
 
