@@ -24,48 +24,13 @@ const FORMS: [string, string | null][] = [
   ["ps aux | grep '[g]odot' | awk '{print $2}' | xargs kill", null],
 
   // A line that ends in a backslash runs on into the next.
-  ['git -C /home/me/Projects/game \\\n  add -A', 'git add -A, --all'],
-  ['git commit \\\n  -a -m x', 'git commit -a or --all'],
-  ['git add docs/a.md \\\n  docs/b.md', null],
-  ['git commit -m x \\\n  && git log --all', null],
+  ['kill \\\n  $(pgrep -f godot)', 'This kills its own shell'],
+  ["kill \\\n  $(pgrep -f '[g]odot')", null],
 
-  // git called by path, and -C or -c with a quoted value.
-  ['/usr/bin/git add -A', 'git add -A, --all'],
-  ['/usr/bin/git commit -am x', 'git commit -a or --all'],
-  ['git -C "/mnt/c/My Projects/repo" add -A', 'git add -A, --all'],
-  ['git -c user.name="A B" commit -am x', 'git commit -a or --all'],
-  ['/usr/bin/git add docs/x.md', null],
-  ['/usr/bin/git status', null],
-  ['git -C "a b" status', null],
-  ['git -C "/mnt/c/My Projects/repo" add docs/x.md', null],
-  ['git -c user.name="A B" commit -m x', null],
-
-  // A flag that closes a subshell or a quoted script.
-  ['(cd /tmp/repo && git add -A)', 'git add -A, --all'],
-  ['sh -c "git add ."', 'git add -A, --all'],
-  ["sh -c 'git commit -a'", 'git commit -a or --all'],
-  ['out=`git add -A`', 'git add -A, --all'],
-  ['git commit -am"msg"', 'git commit -a or --all'],
-  ['(cd /tmp/repo && git add docs/x.md)', null],
-  ['sh -c "git add docs/x.md"', null],
-  ['git commit -m"add tests"', null],
-
-  // A ; & or | inside quotes is part of the message, not the end of the command.
-  ['git commit -m "Fix parser; add tests" -a', 'git commit -a or --all'],
-  ["git commit -m 'a | b' --all", 'git commit -a or --all'],
-  ['git commit -m "a; b"', null],
-  ['git commit -m "a; b"; ls -a', null],
-  ['git commit -m "it\'s done"; ls -a', null],
-  ['git commit -m "a; b" && git log --all', null],
-  ['git commit -m "Drop the -a flag"', null],
-
-  // Other ways of writing the whole tree.
-  ['git add ./', 'git add -A, --all'],
-  ['git add "."', 'git add -A, --all'],
-  ["git add './'", 'git add -A, --all'],
-  ['git add "./docs/x.md"', null],
-  ['git add ".gitignore"', null],
-  ['git add ../shared/x.md', null],
+  // A command after cd, in a subshell, in backticks or in a quoted script.
+  ['(cd /tmp && pkill godot)', 'pkill kills every process'],
+  ['sh -c "pkill godot"', 'pkill kills every process'],
+  ['out=`pkill godot`', 'pkill kills every process'],
 ]
 
 for (const [command, reason] of FORMS) {
