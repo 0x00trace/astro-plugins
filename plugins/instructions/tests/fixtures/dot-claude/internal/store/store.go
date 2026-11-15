@@ -29,7 +29,10 @@ func Open() (*Store, error) {
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return nil, fmt.Errorf("create %s: %w", dir, err)
 	}
-	return &Store{dir: dir}, migrate(dir)
+	if err := migrate(dir); err != nil {
+		return nil, fmt.Errorf("migrate %s: %w", dir, err)
+	}
+	return &Store{dir: dir}, nil
 }
 
 func (s *Store) Add(text string) error {
