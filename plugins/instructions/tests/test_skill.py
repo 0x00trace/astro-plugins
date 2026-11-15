@@ -150,6 +150,18 @@ class InitTest(unittest.TestCase):
         self.assertIn('one "Checked" line that gives the numbers', show)
         self.assertIn("Name any check that still fails, and why you left it", show)
 
+    def test_the_written_files_are_checked_and_the_user_told_how_to_confirm_they_load(
+        self,
+    ):
+        write = section(self.body, "## Phase 5", "### What goes in each file")
+        self.assertIn("read each written file back and check it", write)
+        self.assertIn("confirm each `@` import resolves", write)
+        summary = section(self.body, "## Phase 8")
+        self.assertIn(
+            "each file's line count and what the check after writing found", summary
+        )
+        self.assertIn("run `/context all`, and look under Memory files", summary)
+
     def test_global_skills_and_hooks_go_in_the_home_folder(self):
         where = section(self.body, "Where skills and hooks go", "## Phase 2")
         self.assertIn("`~/.claude/skills/`", where)

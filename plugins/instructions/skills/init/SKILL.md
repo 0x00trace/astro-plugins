@@ -124,6 +124,8 @@ Write what the user approved, with the changes they asked for. In a file that al
 - **Permission rules**: add each approved rule to `permissions.deny` or `permissions.allow` in the settings file "Where skills and hooks go" names, keeping the rules already there.
 - **Global ~/.claude/CLAUDE.md**: before you replace or edit an existing one, back it up with `cp ~/.claude/CLAUDE.md ~/.claude/CLAUDE.md.bak`, and say where the backup is. If a line you wrote repeats a global memory, say so and offer to delete the memory, so it doesn't load twice. Delete it with the `global_memory_delete` tool when it's available. Otherwise, name the memory's file and its line in `~/.claude/memory/MEMORY.md`.
 
+Then read each written file back and check it: count its lines, confirm each `@` import resolves, and confirm each path it names exists. Fix what fails before you go on.
+
 ### What goes in each file
 
 Every line must pass this test: "Would removing this cause Claude to make mistakes?" If not, cut it. Be specific: "Use 2-space indentation in TypeScript" is better than "Format code properly." Don't repeat yourself, and don't make up sections like "Common Development Tasks" or "Tips for Development": include only what you found in files you read or what the user told you.
@@ -240,7 +242,7 @@ Act on each yes before moving on.
 
 ## Phase 8: Summary and next steps
 
-Say which files were written, with the main points in each, and where any backup is. These files are a starting point: the user should review and tweak them, and can run `/instructions:init` again any time to re-scan. `/doctor prompt-audit` checks them later for outdated or conflicting lines.
+Say which files were written, with the main points in each, each file's line count and what the check after writing found, and where any backup is. Tell the user how to confirm the files load: start a new session, run `/context all`, and look under Memory files. A CLAUDE.md in a subdirectory isn't listed there, because it loads only when Claude works in that folder. These files are a starting point: the user should review and tweak them, and can run `/instructions:init` again any time to re-scan. `/doctor prompt-audit` checks them later for outdated or conflicting lines.
 
 Then give a short to-do list of further suggestions, most useful first, with only what applies:
 
