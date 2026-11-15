@@ -2,7 +2,7 @@
 id: AP-2
 type: epic
 title: Review checks
-status: todo
+status: in-progress
 priority: medium
 owner: claude
 created: 2026-11-15
@@ -12,3 +12,4 @@ What the review looks for and how it reports it.
 
 ## Log
 - 2026-11-15 12:51 claude: created
+- 2026-11-15 13:03 claude: moved to in-progress
