@@ -47,8 +47,10 @@ ledger-api/
 │   ├── integration/
 │   │   └── ledger.spec.ts
 │   └── handlers.spec.ts
+├── eslint.config.js
 ├── package.json
 ├── README.md
+├── tsconfig.json
 └── vitest.integration.config.ts
 ```
 
@@ -114,9 +116,9 @@ Development:
 - typescript 5: the compiler
 - tsx 4: runs TypeScript directly in development
 - vitest 3: the test runner
-- eslint 9: the linter
+- eslint 9 and typescript-eslint 8: the linter and its TypeScript rules
 - prettier 3: the formatter
-- @types/node and @types/pg: type definitions
+- `@types/node` and `@types/pg`: type definitions
 
 ## API endpoints
 
@@ -125,9 +127,10 @@ Development:
 | GET | /health | Returns `{"ok": true}` |
 | POST | /accounts | Creates an account and returns its id |
 | POST | /accounts/:id/entries | Books an entry on an account |
+| GET | /accounts/:id/totals | Returns the account's total for each month |
 
-All request bodies are JSON and are validated with zod. A body that fails validation returns a
-400. An unknown account returns a 404 with the code `account_not_found`.
+All request bodies are JSON and are validated with zod. An unknown account returns a 404 with the
+code `account_not_found`.
 
 ## Code style
 

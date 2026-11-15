@@ -15,6 +15,13 @@ BUILD_OUTPUT = {"bin/notes"}
 # pnpm's own commands and package binaries, which aren't scripts in package.json.
 PNPM_COMMANDS = {"install", "vitest"}
 FILE = re.compile(r"^[\w.-]+\.(md|ts|mjs|sql|json|go|mod|example)$")
+# How Claude Code 2.1.325 finds @ imports, outside code spans and fenced blocks.
+IMPORT = re.compile(r"(?:^|\s)@((?:[^\s\\]|\\ )+)")
+
+
+def imports(text):
+    text = re.sub(r"```.*?```", "", text, flags=re.DOTALL)
+    return IMPORT.findall(re.sub(r"`[^`\n]*`", "", text))
 
 
 def git(repo, *args):
@@ -33,7 +40,8 @@ def named_paths(text):
     for span in re.findall(r"`([^`\n]+)`", text):
         if " " in span and not span.startswith("Design Docs/"):
             continue
-        if span.startswith(("/", "~")) or re.search(r"[<>*(){}=$\"']", span):
+        # URL paths, home paths and scoped npm packages such as @types/pg.
+        if span.startswith(("/", "~", "@")) or re.search(r"[<>*(){}=$\"']", span):
             continue
         if "/" in span or FILE.match(span):
             yield span
@@ -130,6 +138,12 @@ class FixturesTest(unittest.TestCase):
         ):
             if name != "lint:all":
                 self.assertIn(name, self.scripts)
+
+    def test_the_seeded_import_is_the_only_one(self):
+        # "@types/node" outside backticks once made Claude Code try to import ./types/node.
+        dot = (self.dot_claude / ".claude" / "CLAUDE.md").read_text()
+        self.assertEqual(imports(self.text), ["Design"])
+        self.assertEqual(imports(dot), [])
 
     def test_dot_claude_keeps_a_sound_file_under_dot_claude(self):
         # D12: the project file can live at ./.claude/CLAUDE.md, and nothing else is wrong with it.
