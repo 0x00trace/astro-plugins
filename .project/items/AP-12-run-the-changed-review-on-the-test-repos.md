@@ -2,7 +2,7 @@
 id: AP-12
 type: task
 title: Run the changed review on the test repos
-status: todo
+status: in-progress
 priority: medium
 owner: claude
 created: 2026-11-15
@@ -26,3 +26,4 @@ Done when each seeded defect gets a proposed fix, and the before-and-after table
 - 2026-11-15 13:25 claude: added subtask: Run review-me once with claude-api off in skillOverrides and capture the one-line notice (AP-8)
 - 2026-11-15 13:33 claude: Phase 3 answers in the after-run, matched to the baseline's: Changes = No. Releases push to main or go through a PR = push to main (keeps Releasing as written; this contradiction with the PR rule wasn't seeded). Where CI lives = In GitHub, not in this copy. How DATABASE_URL arrives = direnv or my shell.
 - 2026-11-15 13:44 claude: From the review-me run: the drafted release skill had an unquoted description with ': ', which is invalid YAML. Only Phase 5's check caught it, so Phase 6 now says to quote such descriptions. Also fixed four unseeded fixture problems both runs flagged: nothing loaded .env (scripts now pass --env-file=.env), the PR rule now exempts releases, there's an index migration behind 'keep the query on an index', and the logger line names Fastify's logger. The scored runs used the earlier fixture, the same one for both.
+- 2026-11-15 13:44 claude: moved to in-progress
