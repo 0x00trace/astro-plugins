@@ -77,6 +77,26 @@ class InitTest(unittest.TestCase):
         )
         self.assertIn("`multiSelect: true`", q1)
 
+    def test_the_project_file_can_live_under_dot_claude(self):
+        # Claude Code loads ./CLAUDE.md or ./.claude/CLAUDE.md as the project file. 0.1.0 read only
+        # the first, so in a repo that keeps it under .claude/ it reported "None yet" and drafted
+        # a second file that loaded alongside the first (fixture dot-claude, case D12).
+        check = section(self.body, "## Phase 0", "## Phase 1")
+        self.assertIn("`./.claude/CLAUDE.md`, so read both paths", check)
+        write = section(self.body, "## Phase 5", "### What goes in each file")
+        self.assertIn("where it is now, `./CLAUDE.md` or `./.claude/CLAUDE.md`", write)
+
+    def test_the_survey_lists_the_files_that_load_with_the_picked_ones(self):
+        # The review can only catch a conflict with a file it knows loads alongside.
+        survey = section(self.body, "**Project survey**", "**Global survey**")
+        for name in [
+            "CLAUDE.md and CLAUDE.local.md in subdirectories",
+            "`.claude/rules/`",
+            "`paths` frontmatter",
+            "AGENTS.md",
+        ]:
+            self.assertIn(name, survey)
+
     def test_global_skills_and_hooks_go_in_the_home_folder(self):
         where = section(self.body, "Where skills and hooks go", "## Phase 2")
         self.assertIn("`~/.claude/skills/`", where)
