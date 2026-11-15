@@ -220,6 +220,8 @@ description: <what the skill does and when to use it>
 <Instructions for Claude>
 ```
 
+Put the description in double quotes when it contains a colon followed by a space, such as "Cut a release: bump the version". Unquoted, that's invalid YAML, and the frontmatter doesn't load.
+
 Both the user (`/<skill-name>`) and Claude can invoke a skill by default. For a workflow with side effects (e.g., `/deploy`, `/fix-issue 123`), add `disable-model-invocation: true` so only the user can start it, and take its input from the arguments placeholder: a dollar sign followed by `ARGUMENTS`.
 
 ## Phase 7: Suggest additional optimizations
