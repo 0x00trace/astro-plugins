@@ -2,7 +2,7 @@
 id: AP-15
 type: task
 title: Record the decision in PROJECT.md
-status: todo
+status: done
 priority: medium
 owner: claude
 created: 2026-11-15
@@ -14,8 +14,11 @@ Done when Decisions links decision 0001 and Status describes the new review.
 
 ## Subtasks
 - [x] Decision line linking `.project/docs/decisions/0001-review-runs-the-prompt-audit.md`
-- [ ] Status
+- [x] Status
 
 ## Log
 - 2026-11-15 12:51 claude: created
 - 2026-11-15 12:52 claude: done subtask: Decision line linking `.project/docs/decisions/0001-review-runs-the-prompt-audit.md`
+- 2026-11-15 13:50 claude: moved to in-progress
+- 2026-11-15 13:50 claude: done subtask: Status
+- 2026-11-15 13:50 claude: moved to done
