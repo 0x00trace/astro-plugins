@@ -22,4 +22,15 @@ export function registerHandlers(server: FastifyInstance) {
     );
     return { ok: true };
   });
+
+  server.get<{ Params: { id: string } }>("/accounts/:id/totals", async (request) => {
+    const account = await query("select id from accounts where id = $1", [request.params.id]);
+    if (account.length === 0) throw notFound("account");
+    const rows = await query(
+      `select to_char(booked_on, 'YYYY-MM') as month, sum(amount_cents)::int as total_cents
+       from entries where account_id = $1 group by 1 order by 1`,
+      [request.params.id],
+    );
+    return { totals: rows };
+  });
 }
