@@ -162,6 +162,15 @@ class InitTest(unittest.TestCase):
         )
         self.assertIn("run `/context all`, and look under Memory files", summary)
 
+    def test_a_skill_description_with_a_colon_is_quoted(self):
+        # In the AP-12 run the drafted release skill's description read "Cut a ledger-api release:
+        # bump the version, ...". Unquoted, ": " made the frontmatter invalid YAML; only the check
+        # after writing caught it.
+        create = section(self.body, "## Phase 6", "## Phase 7")
+        self.assertIn(
+            "double quotes when it contains a colon followed by a space", create
+        )
+
     def test_global_skills_and_hooks_go_in_the_home_folder(self):
         where = section(self.body, "Where skills and hooks go", "## Phase 2")
         self.assertIn("`~/.claude/skills/`", where)
