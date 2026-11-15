@@ -29,7 +29,7 @@ Print this as the first text of your reply, before any tool call:
 > - **Skills** are packaged instructions Claude invokes automatically when a task matches, or that you trigger with a slash command (e.g. `/frontend-design`).
 > - **Hooks** run shell commands automatically on lifecycle events: get notified when Claude is waiting on you, format after edits, enforce checks. They're deterministic, so Claude can't skip them.
 
-Then read these with the Read tool, and don't explore the tree yet: `./CLAUDE.md` at the project root (only the root file counts), `./CLAUDE.local.md` and `~/.claude/CLAUDE.md`. Note which exist and how many lines each has.
+Then read these with the Read tool, and don't explore the tree yet: the project file, `./CLAUDE.local.md` and `~/.claude/CLAUDE.md`. The project file can be `./CLAUDE.md` or `./.claude/CLAUDE.md`, so read both paths. If both exist, both load in every session: treat them as one project file and check them against each other. Note which exist, at which path, and how many lines each has. Only these files count here. Nested ones come in Phase 2.
 
 ## Phase 1: Ask what to set up
 
@@ -41,7 +41,7 @@ Call AskUserQuestion with only this question, with `multiSelect: true`:
   - "Global ~/.claude/CLAUDE.md": "Your preferences for every project on this machine: tools, shell, workflow, how you want answers."
   - "Let Claude decide": "Fastest path: project CLAUDE.md plus whatever skills or hooks fit this repo. No more setup questions; you'll approve everything before it's written."
 
-End each file option's description with what Phase 0 found, such as "Exists, 40 lines." or "None yet." If the folder isn't a git repo, say so in the question: a CLAUDE.md there loads in every project below it.
+End each file option's description with what Phase 0 found, such as "Exists, 40 lines.", "Exists at `.claude/CLAUDE.md`, 18 lines." or "None yet." If the folder isn't a git repo, say so in the question: a CLAUDE.md there loads in every project below it.
 
 How the answer routes:
 
@@ -69,6 +69,7 @@ Launch a subagent for each survey the picked files need, in parallel. Tell each 
 - Code style rules that differ from language defaults
 - Non-obvious gotchas, required env vars or workflow quirks
 - Existing .claude/skills/ and .claude/rules/ directories
+- The other instruction files that load with the picked files, each with its path: CLAUDE.md and CLAUDE.local.md in subdirectories, the files in `.claude/rules/` and whether each has `paths` frontmatter, and AGENTS.md
 - Formatter configuration (prettier, biome, ruff, black, gofmt, rustfmt, or a unified format script like `npm run format` or `make fmt`)
 - Git worktrees, with `git worktree list` (only when the personal file was picked)
 
@@ -113,7 +114,7 @@ End your turn there. Write nothing until the user replies. If they ask for chang
 
 Write what the user approved, with the changes they asked for. In a file that already exists, make only the approved edits.
 
-- **Project CLAUDE.md**: at the project root.
+- **Project CLAUDE.md**: where it is now, `./CLAUDE.md` or `./.claude/CLAUDE.md`. A new one goes at the project root.
 - **CLAUDE.local.md**: at the project root, then add `CLAUDE.local.md` to the project's `.gitignore`. If the user's worktrees are siblings, put the content in `~/.claude/<project-name>-instructions.md`, make CLAUDE.local.md the one-line import `@~/.claude/<project-name>-instructions.md`, and tell the user to copy that line to each worktree. Never put this import in the project CLAUDE.md. Nested worktrees need nothing extra: Claude Code finds the main repo's CLAUDE.local.md from them.
 - **Global ~/.claude/CLAUDE.md**: before you replace or edit an existing one, back it up with `cp ~/.claude/CLAUDE.md ~/.claude/CLAUDE.md.bak`, and say where the backup is. If a line you wrote repeats a global memory, say so and offer to delete the memory, so it doesn't load twice. Delete it with the `global_memory_delete` tool when it's available. Otherwise, name the memory's file and its line in `~/.claude/memory/MEMORY.md`.
 

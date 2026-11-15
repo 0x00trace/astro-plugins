@@ -2,7 +2,7 @@
 id: AP-6
 type: task
 title: Run the 0.1.0 review on the test repos
-status: todo
+status: in-progress
 priority: high
 owner: claude
 created: 2026-11-15
@@ -21,3 +21,5 @@ Done when a table of the 12 cases (11 defects plus the `.claude/CLAUDE.md` locat
 
 ## Log
 - 2026-11-15 12:51 claude: created
+- 2026-11-15 13:18 claude: moved to in-progress
+- 2026-11-15 13:18 claude: Rule for both runs (AP-6 and AP-12): approve reads and writes in the session's own scratchpad; decline installs, network fetches and edits to the repo before the edits are shown. A pilot on the pre-fix fixture is running; the scored baseline reruns on the fixed fixture.
