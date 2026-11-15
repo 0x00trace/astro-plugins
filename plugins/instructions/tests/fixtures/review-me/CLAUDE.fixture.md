@@ -177,8 +177,6 @@ IMPORTANT: you MUST ALWAYS run `pnpm test` before you commit. NEVER skip this!!
 
 - Use the error helpers in `src/lib/errors.ts`, never throw raw strings or plain `Error`, because
   the error handler only maps an `AppError` to a status code. Anything else becomes a 500.
-- `src/lib/db.ts` opens its pool when it's first imported, so a test that imports a handler needs
-  `DATABASE_URL` set even if it never queries.
 
 ## Releasing
 
