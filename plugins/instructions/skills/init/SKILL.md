@@ -1,7 +1,7 @@
 ---
 name: init
 description: Set up or improve CLAUDE.md files, and optionally skills and hooks - a project's CLAUDE.md, a personal CLAUDE.local.md, and the global ~/.claude/CLAUDE.md that loads in every project. A fork of Claude Code's new /init that shows every draft before asking to write it, and adds the global file. Use when the user asks to set up, start, redo or review a project's CLAUDE.md, a CLAUDE.local.md or their global CLAUDE.md. For a one-line change to one of these files, edit the file instead.
-allowed-tools: Read, Bash(git worktree list), Bash(git remote -v), Bash(which gh), Bash(cp ~/.claude/CLAUDE.md ~/.claude/CLAUDE.md.bak)
+allowed-tools: Read, Bash(git worktree list), Bash(git remote -v), Bash(which gh), Bash(cp ~/.claude/CLAUDE.md ~/.claude/CLAUDE.md.bak), Skill(claude-api *)
 ---
 
 # Set up CLAUDE.md files
@@ -59,7 +59,7 @@ Where skills and hooks go:
 
 ## Phase 2: Explore
 
-Launch a subagent for each survey the picked files need, in parallel. Tell each to read only, never edit, and to report what it couldn't find out.
+Launch a subagent for each survey the picked files need, and one for each prompt audit, in parallel. Tell each to read only, never edit, and to report what it couldn't find out.
 
 **Project survey**, for the project or personal file, or skills and hooks for this repo. Read the key files: manifest files (package.json, Cargo.toml, pyproject.toml, go.mod, pom.xml, etc.), README, Makefile and build configs, CI config, existing CLAUDE.md, .claude/rules/, AGENTS.md, .cursor/rules or .cursorrules, .github/copilot-instructions.md, .devin/rules/ or .windsurf/rules/ or .windsurfrules, .clinerules and .mcp.json. Detect:
 
@@ -79,6 +79,10 @@ Launch a subagent for each survey the picked files need, in parallel. Tell each 
 - Their projects: the folders their recent sessions ran in, from the `cwd` field of the transcripts under `~/.claude/projects/`. In each: the manifests, CI, formatter and linter config, CLAUDE.md or AGENTS.md, and the last 20 commits for commit style. Report what repeats across projects, not what one project does.
 - Their machine: the OS and distro, how system packages are installed, the shell and whether its aliases reach Claude's Bash tool (such as `cat` running `bat`), and which toolchains and package managers are installed.
 - Their corrections: the user's own messages in the 40 most recent transcripts under `~/.claude/projects/*/`, skipping tool results, command wrappers and pasted text. Look for instructions given more than once, and corrections such as "don't", "stop", "I said" or "use X, not Y". For each, give the instruction in one line, how often it came up and one short quote. Rank what holds in any project first. Leave out names, emails and secrets.
+
+**Prompt audit**, for each picked file you review and improve. It runs Claude Code's own check for instructions written for older models, instructions that contradict each other, and paths or commands that don't exist, the one `/doctor prompt-audit <path>` runs. Give a general-purpose subagent this brief, with the file's path:
+
+> Audit `<path>` with Claude Code's bundled prompt audit: call the Skill tool with `skill: "claude-api"` and `args: "prompt-audit <path>"`, and follow what it loads through Step 6. Read only: edit no file, and run nothing that installs, fetches or runs the project's code. Skip Step 7, and don't look inside Claude Code's own files. Send back each finding's location, quoted evidence, confidence and action, with the replacement text, and leave out the diff. If the Skill call fails, send back its exact error and stop.
 
 Note what the surveys couldn't find out: those become the Phase 3 questions.
 
@@ -104,7 +108,7 @@ Draft every picked file under "What goes in each file" below. Then reply with, i
 
 1. If the skills and hooks differ from the Q2 hint, one line saying so, such as "You said hooks only, but nothing here is hook-shaped."
 2. Each new or replaced file in full, in a fenced markdown block under its path.
-3. For each file to review and improve: numbered edits, each a `diff` block with the lines removed and added, and one line of why. The existing file is the baseline: catch what's missing, outdated or bloated.
+3. For each file to review and improve: numbered edits, each a `diff` block with the lines removed and added, and one line of why. The existing file is the baseline: catch what's missing, outdated or bloated. Each high- or medium-confidence finding from its prompt audit becomes an edit, unless the user's Phase 3 answer says otherwise. After the edits, list the audit's flags and low-confidence findings as questions, one line each. If the audit didn't run, say why in one line, such as "The prompt audit didn't run: `claude-api` is turned off in `skillOverrides`."
 4. One bullet per skill and hook: `**Skill**` or `**Hook**`, its name, what it does and its target file. For a skill, add why it fits.
 5. A last line asking the user to reply "write it", to pick edits by number ("1, 3"), or to say what to change.
 
