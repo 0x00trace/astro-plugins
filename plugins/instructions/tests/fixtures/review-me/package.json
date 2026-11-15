@@ -5,14 +5,14 @@
   "type": "module",
   "packageManager": "pnpm@10.4.1",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
+    "dev": "tsx watch --env-file=.env src/index.ts",
     "build": "tsc -p .",
     "test": "vitest run tests --exclude tests/integration",
     "test:integration": "vitest run --config vitest.integration.config.ts",
     "lint": "eslint src tests",
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit",
-    "db:migrate": "node scripts/migrate.mjs"
+    "db:migrate": "node --env-file=.env scripts/migrate.mjs"
   },
   "dependencies": {
     "fastify": "^5.2.1",

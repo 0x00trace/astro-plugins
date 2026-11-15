@@ -31,7 +31,8 @@ ledger-api/
 ├── Design Docs/
 │   └── api.md
 ├── migrations/
-│   └── 001_init.sql
+│   ├── 001_init.sql
+│   └── 002_entries_account_index.sql
 ├── scripts/
 │   └── migrate.mjs
 ├── src/
@@ -153,7 +154,7 @@ code `account_not_found`.
 
 ## Working rules
 
-When you change a handler, update its zod schema in the same commit and keep the response shape the same unless the ticket says otherwise, because the mobile app pins the shape. Don't add new dependencies without asking first. Keep functions under 40 lines where you can. Log with the logger from `src/server.ts`, not console.log, since console output is dropped in production. Every new endpoint needs an entry in `Design Docs/api.md`. Prefer early returns over nested ifs. Don't touch a migration once it has shipped; add a new one instead.
+When you change a handler, update its zod schema in the same commit and keep the response shape the same unless the ticket says otherwise, because the mobile app pins the shape. Don't add new dependencies without asking first. Keep functions under 40 lines where you can. Log with Fastify's logger (`request.log` in a handler), not console.log, since console output is dropped in production. Every new endpoint needs an entry in `Design Docs/api.md`. Prefer early returns over nested ifs. Don't touch a migration once it has shipped; add a new one instead.
 
 ## Testing
 
@@ -201,7 +202,7 @@ To release a new version:
 - Branch from `main`, and name the branch `feature/<ticket>-<slug>` or `fix/<ticket>-<slug>`.
 - Write commit messages in the imperative mood.
 - Keep commits small and focused.
-- Open a pull request for every change, and get one approval before merging.
+- Open a pull request for every change except a release, and get one approval before merging.
 - Squash-merge pull requests.
 - We moved from npm to pnpm in PR #12, so use pnpm now and never commit a `package-lock.json`.
 
