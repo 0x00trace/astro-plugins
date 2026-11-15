@@ -50,7 +50,7 @@
     {
       "name": "instructions",
       "source": "./plugins/instructions",
-      "description": "/instructions:init sets up a project's CLAUDE.md and CLAUDE.local.md and your global ~/.claude/CLAUDE.md, with optional skills and hooks. A fork of Claude Code's new /init that shows every draft in full and waits for your reply before writing."
+      "description": "/instructions:init sets up and reviews a project's CLAUDE.md and CLAUDE.local.md and your global ~/.claude/CLAUDE.md. A fork of Claude Code's new /init that checks each file against Claude Code's docs and prompt audit, and shows every draft before writing."
     },
     {
       "name": "corkboard",

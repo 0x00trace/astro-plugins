@@ -2,7 +2,7 @@
 id: AP-12
 type: task
 title: Run the changed review on the test repos
-status: in-progress
+status: done
 priority: medium
 owner: claude
 created: 2026-11-15
@@ -18,7 +18,7 @@ Done when each seeded defect gets a proposed fix, and the before-and-after table
 - [x] Score the runs against the baseline table
 - [x] Fix what the review missed and rerun
 - [x] Reply 'write it' in the review-me run and capture Phase 5's check and Phase 8's /context all step (AP-11)
-- [ ] Run review-me once with claude-api off in skillOverrides and capture the one-line notice (AP-8)
+- [x] Run review-me once with claude-api off in skillOverrides and capture the one-line notice (AP-8)
 
 ## Log
 - 2026-11-15 12:51 claude: created
@@ -34,3 +34,5 @@ Done when each seeded defect gets a proposed fix, and the before-and-after table
 - 2026-11-15 13:48 claude: done subtask: Reply 'write it' in the review-me run and capture Phase 5's check and Phase 8's /context all step (AP-11)
 - 2026-11-15 13:48 claude: done subtask: Fix what the review missed and rerun
 - 2026-11-15 13:48 claude: Nothing seeded was missed. Fixed the two dot-claude flaws both runs flagged: the migration rule's wrong reason, and store.go returning migrate's error unwrapped. dot-claude still vets and passes go test.
+- 2026-11-15 13:50 claude: done subtask: Run review-me once with claude-api off in skillOverrides and capture the one-line notice (AP-8)
+- 2026-11-15 13:50 claude: moved to done
