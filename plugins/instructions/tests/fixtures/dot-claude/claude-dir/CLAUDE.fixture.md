@@ -12,7 +12,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Conventions
 
 - Wrap every returned error with `fmt.Errorf("<what failed>: %w", err)`, because the CLI prints the whole chain as its only error message.
-- A change to the `Note` struct changes the file format: bump `currentVersion` and add the upgrade step to `internal/store/migrate.go` in the same commit, or existing notes stop loading.
+- A change to the `Note` struct changes the file format: bump `currentVersion` and add the upgrade step to `internal/store/migrate.go` in the same commit. `List` decodes every file into the current `Note` and never reads `Version`, so without the step old notes load with wrong or missing fields.
 
 ## Gotchas
 
