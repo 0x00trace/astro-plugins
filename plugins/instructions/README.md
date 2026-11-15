@@ -30,6 +30,7 @@ Each check comes from Claude Code's [memory](https://code.claude.com/docs/en/mem
 
 - **Size**: under 200 lines. Imports don't lower the cost.
 - **Structure**: headings and bullets, not paragraphs, each rule with its reason.
+- **Header**: the project file and the global file start with `# CLAUDE.md` and a line saying where the file applies, the way `/init` starts a project file. A review adds the header when it's missing.
 - **Specific**: concrete enough to check, at normal volume, with no "IMPORTANT" or "try to".
 - **Place**: a rule that must always hold goes in a permission rule or hook, a procedure in a skill, a rule for one part of the code in `.claude/rules/` with `paths`, and personal or every-project lines in their own files.
 - **Not in the code**: no directory trees, dependency lists or architecture tours.
