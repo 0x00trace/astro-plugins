@@ -177,7 +177,17 @@ Exclude:
 - What Claude does anyway, and generic advice
 - Names, emails and secrets
 
-A rule for one language or file type goes in `~/.claude/rules/<topic>.md` with `paths` frontmatter, so it loads only when Claude works with matching files. Group the lines under short headings, such as `# Environment` and `# How to work`. Don't start it with the project file's opening lines.
+A rule for one language or file type goes in `~/.claude/rules/<topic>.md` with `paths` frontmatter, so it loads only when Claude works with matching files.
+
+Start it with:
+
+```
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) in every project.
+```
+
+Group the lines below it under short headings, such as `## Environment` and `## How to work`.
 
 ### Check every file
 
@@ -185,6 +195,7 @@ Check each draft, and each file you review, against this list before you show it
 
 - **Size**: under 200 lines. Imports don't lower the cost, because an imported file loads with the file that imports it.
 - **Structure**: related lines go under markdown headings, as bullets, not paragraphs. Each rule keeps its reason in the same bullet.
+- **Header**: a project file or the global file starts with its header from "What goes in each file". If a file under review doesn't, the first edit adds it.
 - **Specific**: each line is concrete enough to check, such as "Use 2-space indentation", not "Format code properly". Say it at normal volume: no capitals, "IMPORTANT" or "!!" for emphasis, and no "try to" on a real requirement.
 - **Place**: each line is where it works best.
   - A rule that must hold every time goes in a permission rule or a hook, because Claude can decide a CLAUDE.md line doesn't apply. "Never read `.env`" is a deny rule such as `Read(./.env)`, and "always run the formatter" is a PostToolUse hook.

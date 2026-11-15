@@ -189,6 +189,26 @@ class InitTest(unittest.TestCase):
             write,
         )
 
+    def test_the_project_and_global_files_start_with_a_header(self):
+        # 0.2.0 gave the project file /init's "# CLAUDE.md" header and told Claude to leave it off
+        # the global file, and no check caught a missing one, so a review never added it.
+        goes = section(self.body, "### What goes in each file", "### Check every file")
+        project = section(goes, "**Project CLAUDE.md.**", "**CLAUDE.local.md.**")
+        self.assertIn(
+            "# CLAUDE.md\n\nThis file provides guidance to Claude Code (claude.ai/code) "
+            "when working with code in this repository.",
+            project,
+        )
+        global_file = section(goes, "**Global ~/.claude/CLAUDE.md.**")
+        self.assertIn(
+            "# CLAUDE.md\n\nThis file provides guidance to Claude Code (claude.ai/code) "
+            "in every project.",
+            global_file,
+        )
+        self.assertNotIn("Don't start it with", global_file)
+        checks = section(self.body, "### Check every file", "## Phase 6")
+        self.assertIn("If a file under review doesn't, the first edit adds it", checks)
+
     def test_the_global_survey_looks_past_one_repo(self):
         survey = section(self.body, "**Global survey**", "## Phase 3")
         for source in [
