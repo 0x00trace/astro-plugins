@@ -2,7 +2,7 @@
 id: AP-8
 type: task
 title: Run the prompt audit during the review
-status: in-progress
+status: done
 priority: medium
 owner: claude
 created: 2026-11-15
@@ -28,3 +28,5 @@ Done when a review shows the audit's findings as numbered edits, and with `claud
 - 2026-11-15 13:23 claude: done subtask: Wording test
 - 2026-11-15 13:23 claude: Phase 2 starts one audit subagent per file under review, with a brief that skips Step 7, rules out installs and running project code, and says not to look inside Claude Code's files (the spike spent most of its 11 minutes there). Added Skill(claude-api *) to allowed-tools: the docs give that syntax but don't say whether the grant reaches a subagent, and AP-12's run in default mode will show it. Stays open until a live run shows the findings as edits, and the off path's one-line notice.
 - 2026-11-15 13:29 claude: Live: in the AP-12 run (default permission mode) the audit subagent called Skill(claude-api, 'prompt-audit <abs path>/CLAUDE.md') with no approval prompt, so the allowed-tools grant Skill(claude-api *) reaches a subagent the skill starts.
+- 2026-11-15 13:50 claude: Off path, live (dot-claude, skillOverrides claude-api off): the audit subagent's Skill call failed with 'disabled for model invocation in skillOverrides settings', and the review said: 'The prompt audit didn't run: claude-api is turned off for model invocation in skillOverrides. I used the checklist in its place.' It proposed 1 edit and the Checked line. On path, live: the review-me run turned the audit's findings into edits (AP-12).
+- 2026-11-15 13:50 claude: moved to done
