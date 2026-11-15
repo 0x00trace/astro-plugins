@@ -104,12 +104,12 @@ Then sort each finding:
 
 ## Phase 4: Show the drafts and end your turn
 
-Draft every picked file under "What goes in each file" below. Then reply with, in this order:
+Draft every picked file under "What goes in each file" below, and check each draft and each file you review under "Check every file". Then reply with, in this order:
 
 1. If the skills and hooks differ from the Q2 hint, one line saying so, such as "You said hooks only, but nothing here is hook-shaped."
 2. Each new or replaced file in full, in a fenced markdown block under its path.
 3. For each file to review and improve: numbered edits, each a `diff` block with the lines removed and added, and one line of why. The existing file is the baseline: catch what's missing, outdated or bloated. Each high- or medium-confidence finding from its prompt audit becomes an edit, unless the user's Phase 3 answer says otherwise. After the edits, list the audit's flags and low-confidence findings as questions, one line each. If the audit didn't run, say why in one line, such as "The prompt audit didn't run: `claude-api` is turned off in `skillOverrides`."
-4. One bullet per skill and hook: `**Skill**` or `**Hook**`, its name, what it does and its target file. For a skill, add why it fits.
+4. One bullet per skill, hook and permission rule: `**Skill**`, `**Hook**` or `**Permission**`, its name or rule, what it does and its target file. For a skill, add why it fits.
 5. A last line asking the user to reply "write it", to pick edits by number ("1, 3"), or to say what to change.
 
 End your turn there. Write nothing until the user replies. If they ask for changes, show the changed draft the same way and end your turn again.
@@ -120,6 +120,7 @@ Write what the user approved, with the changes they asked for. In a file that al
 
 - **Project CLAUDE.md**: where it is now, `./CLAUDE.md` or `./.claude/CLAUDE.md`. A new one goes at the project root.
 - **CLAUDE.local.md**: at the project root, then add `CLAUDE.local.md` to the project's `.gitignore`. If the user's worktrees are siblings, put the content in `~/.claude/<project-name>-instructions.md`, make CLAUDE.local.md the one-line import `@~/.claude/<project-name>-instructions.md`, and tell the user to copy that line to each worktree. Never put this import in the project CLAUDE.md. Nested worktrees need nothing extra: Claude Code finds the main repo's CLAUDE.local.md from them.
+- **Permission rules**: add each approved rule to `permissions.deny` or `permissions.allow` in the settings file "Where skills and hooks go" names, keeping the rules already there.
 - **Global ~/.claude/CLAUDE.md**: before you replace or edit an existing one, back it up with `cp ~/.claude/CLAUDE.md ~/.claude/CLAUDE.md.bak`, and say where the backup is. If a line you wrote repeats a global memory, say so and offer to delete the memory, so it doesn't load twice. Delete it with the `global_memory_delete` tool when it's available. Otherwise, name the memory's file and its line in `~/.claude/memory/MEMORY.md`.
 
 ### What goes in each file
@@ -174,6 +175,28 @@ Exclude:
 - Names, emails and secrets
 
 A rule for one language or file type goes in `~/.claude/rules/<topic>.md` with `paths` frontmatter, so it loads only when Claude works with matching files. Group the lines under short headings, such as `# Environment` and `# How to work`. Don't start it with the project file's opening lines.
+
+### Check every file
+
+Check each draft, and each file you review, against this list before you show it. It comes from Claude Code's docs on writing CLAUDE.md files, and it also stands in for the prompt audit when the audit didn't run. Propose a fix for each line that fails.
+
+- **Size**: under 200 lines. Imports don't lower the cost, because an imported file loads with the file that imports it.
+- **Structure**: related lines go under markdown headings, as bullets, not paragraphs. Each rule keeps its reason in the same bullet.
+- **Specific**: each line is concrete enough to check, such as "Use 2-space indentation", not "Format code properly". Say it at normal volume: no capitals, "IMPORTANT" or "!!" for emphasis, and no "try to" on a real requirement.
+- **Place**: each line is where it works best.
+  - A rule that must hold every time goes in a permission rule or a hook, because Claude can decide a CLAUDE.md line doesn't apply. "Never read `.env`" is a deny rule such as `Read(./.env)`, and "always run the formatter" is a PostToolUse hook.
+  - A procedure with several steps, such as a release, goes in a skill, which loads only when it's used.
+  - A rule for one part of the code goes in `.claude/rules/<topic>.md` with `paths` frontmatter.
+  - What's personal goes in CLAUDE.local.md, and what holds in every project goes in the global file.
+- **Not in the code**: no directory trees, file or dependency lists, schemas or architecture walk-throughs that Claude can read from the repo.
+- **True**: every path, command, script and flag the file names exists. Check them by reading the manifests and scripts, not by running them.
+- **Consistent**: no line contradicts another line or a file that loads with it, from the list Phase 2 made.
+- **Current**: the rule as it stands, without its history, such as "we moved to pnpm in PR #12", "now" or "no longer".
+- **Imports**: each `@path` resolves, relative to the file that has it, at most four hops deep. A space in a path needs a backslash (`@Design\ Docs/api.md`), a quoted path doesn't import, and an `@` that isn't meant as an import, such as `@types/node`, goes in backticks. Text inside `<!-- -->` never reaches Claude.
+- **Rule files**: `paths` is the only frontmatter field Claude Code reads. If the YAML doesn't parse, the rule loads for every file.
+- **Git rules**: if the file sets commit or pull request rules and `includeGitInstructions` isn't `false` in the user's settings, Claude Code's own git instructions compete with them. Offer to set it to `false`.
+
+Don't cut a line only to save space when Claude can't learn it from the code: a gotcha, a decision, or the reason behind a rule.
 
 ## Phase 6: Create skills (if the approved reply includes any)
 
