@@ -108,9 +108,10 @@ Draft every picked file under "What goes in each file" below, and check each dra
 
 1. If the skills and hooks differ from the Q2 hint, one line saying so, such as "You said hooks only, but nothing here is hook-shaped."
 2. Each new or replaced file in full, in a fenced markdown block under its path.
-3. For each file to review and improve: numbered edits, each a `diff` block with the lines removed and added, and one line of why. The existing file is the baseline: catch what's missing, outdated or bloated. Each high- or medium-confidence finding from its prompt audit becomes an edit, unless the user's Phase 3 answer says otherwise. After the edits, list the audit's flags and low-confidence findings as questions, one line each. If the audit didn't run, say why in one line, such as "The prompt audit didn't run: `claude-api` is turned off in `skillOverrides`."
-4. One bullet per skill, hook and permission rule: `**Skill**`, `**Hook**` or `**Permission**`, its name or rule, what it does and its target file. For a skill, add why it fits.
-5. A last line asking the user to reply "write it", to pick edits by number ("1, 3"), or to say what to change.
+3. For each file to review and improve: numbered edits. Head each with the lines it changes as `path:line`, and the check or audit finding it fixes, such as "`CLAUDE.md:24`, True: `package.json` has no `lint:all` script". Then a `diff` block with the lines removed and added. The existing file is the baseline: catch what's missing, outdated or bloated. Each high- or medium-confidence finding from its prompt audit becomes an edit, unless the user's Phase 3 answer says otherwise. After the edits, list the audit's flags and low-confidence findings as questions, one line each. If the audit didn't run, say why in one line, such as "The prompt audit didn't run: `claude-api` is turned off in `skillOverrides`."
+4. Under each file, one "Checked" line that gives the numbers, so a file with nothing to fix reads as checked, not skipped. For example: "Checked: 38 lines after the edits; 6 paths, 3 commands and 1 import found; no conflicts with `~/.claude/CLAUDE.md` or `.claude/rules/testing.md`." Name any check that still fails, and why you left it.
+5. One bullet per skill, hook and permission rule: `**Skill**`, `**Hook**` or `**Permission**`, its name or rule, what it does and its target file. For a skill, add why it fits.
+6. A last line asking the user to reply "write it", to pick edits by number ("1, 3"), or to say what to change.
 
 End your turn there. Write nothing until the user replies. If they ask for changes, show the changed draft the same way and end your turn again.
 

@@ -141,6 +141,15 @@ class InitTest(unittest.TestCase):
             "`permissions.deny`", section(self.body, "## Phase 5", "### What goes")
         )
 
+    def test_each_edit_shows_its_evidence_and_each_file_its_checks(self):
+        # A review that says only "this is outdated" can't be checked, and a clean file with no
+        # edits looks the same as one the review skipped.
+        show = section(self.body, "## Phase 4", "## Phase 5")
+        self.assertIn("Head each with the lines it changes as `path:line`", show)
+        self.assertIn("the check or audit finding it fixes", show)
+        self.assertIn('one "Checked" line that gives the numbers', show)
+        self.assertIn("Name any check that still fails, and why you left it", show)
+
     def test_global_skills_and_hooks_go_in_the_home_folder(self):
         where = section(self.body, "Where skills and hooks go", "## Phase 2")
         self.assertIn("`~/.claude/skills/`", where)
