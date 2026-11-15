@@ -2,7 +2,7 @@
 id: AP-9
 type: task
 title: Add the check list for what the audit doesn't cover
-status: todo
+status: done
 priority: medium
 owner: claude
 created: 2026-11-15
@@ -13,9 +13,15 @@ A short list from the memory and best-practices docs, applied to fresh drafts an
 Done when SKILL.md applies the list to drafts and reviews, and tests pin the 200-line, import, placement and git-instructions items.
 
 ## Subtasks
-- [ ] Write the list in SKILL.md
-- [ ] Point Phase 4 at it for drafts and reviews
-- [ ] Wording tests
+- [x] Write the list in SKILL.md
+- [x] Point Phase 4 at it for drafts and reviews
+- [x] Wording tests
 
 ## Log
 - 2026-11-15 12:51 claude: created
+- 2026-11-15 13:23 claude: moved to in-progress
+- 2026-11-15 13:24 claude: done subtask: Write the list in SKILL.md
+- 2026-11-15 13:24 claude: done subtask: Point Phase 4 at it for drafts and reviews
+- 2026-11-15 13:24 claude: done subtask: Wording tests
+- 2026-11-15 13:24 claude: The list sits under 'What goes in each file' as '### Check every file'. Phase 4 checks drafts and reviewed files against it. It repeats the audit's main checks (volume, true, consistent, current) in short form because it's also the fallback when the audit is off, and the audit never sees fresh drafts. Phase 4 can now propose a **Permission** rule, and Phase 5 writes approved ones into permissions.deny or allow. Live scoring happens in AP-12.
+- 2026-11-15 13:24 claude: moved to done

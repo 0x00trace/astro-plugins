@@ -113,6 +113,34 @@ class InitTest(unittest.TestCase):
         self.assertIn("If the audit didn't run, say why in one line", show)
         self.assertIn("Skill(claude-api *)", field(self.front, "allowed-tools"))
 
+    def test_every_file_is_checked_against_the_memory_docs(self):
+        # The AP-5 audit missed what these cover: size (D1), dense paragraphs (D2), a rule that
+        # belongs in a deny rule (D8), a directory tree (D9) and a procedure for a skill (D10).
+        checks = section(self.body, "### Check every file", "## Phase 6")
+        for item in [
+            "under 200 lines",
+            "Imports don't lower the cost",
+            "as bullets, not paragraphs",
+            'no capitals, "IMPORTANT" or "!!"',
+            "deny rule such as `Read(./.env)`",
+            "goes in a skill",
+            "`.claude/rules/<topic>.md` with `paths` frontmatter",
+            "no directory trees",
+            "A space in a path needs a backslash",
+            "`paths` is the only frontmatter field",
+            "`includeGitInstructions`",
+            "Don't cut a line only to save space",
+        ]:
+            self.assertIn(item, checks)
+        show = section(self.body, "## Phase 4", "## Phase 5")
+        self.assertIn(
+            'check each draft and each file you review under "Check every file"', show
+        )
+        self.assertIn("`**Permission**`", show)
+        self.assertIn(
+            "`permissions.deny`", section(self.body, "## Phase 5", "### What goes")
+        )
+
     def test_global_skills_and_hooks_go_in_the_home_folder(self):
         where = section(self.body, "Where skills and hooks go", "## Phase 2")
         self.assertIn("`~/.claude/skills/`", where)
