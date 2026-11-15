@@ -97,6 +97,22 @@ class InitTest(unittest.TestCase):
         ]:
             self.assertIn(name, survey)
 
+    def test_a_review_runs_the_bundled_prompt_audit(self):
+        # Decision 0001: the review runs Claude Code's own audit rather than a copy of its rubric.
+        # In the AP-5 spike the full audit spent 11 minutes, most of it on Step 7 probes, grepping
+        # the claude binary and trying to install packages, so the brief rules those out.
+        audit = section(self.body, "**Prompt audit**", "## Phase 3")
+        self.assertIn('`skill: "claude-api"` and `args: "prompt-audit <path>"`', audit)
+        self.assertIn("Skip Step 7", audit)
+        self.assertIn(
+            "run nothing that installs, fetches or runs the project's code", audit
+        )
+        self.assertIn("send back its exact error and stop", audit)
+        show = section(self.body, "## Phase 4", "## Phase 5")
+        self.assertIn("finding from its prompt audit becomes an edit", show)
+        self.assertIn("If the audit didn't run, say why in one line", show)
+        self.assertIn("Skill(claude-api *)", field(self.front, "allowed-tools"))
+
     def test_global_skills_and_hooks_go_in_the_home_folder(self):
         where = section(self.body, "Where skills and hooks go", "## Phase 2")
         self.assertIn("`~/.claude/skills/`", where)
