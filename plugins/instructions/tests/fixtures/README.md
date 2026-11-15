@@ -24,7 +24,7 @@ A case is **caught** when the review proposes an edit that fixes it, **named** w
 
 | ID | Case | Where in review-me | What a good review proposes |
 | --- | --- | --- | --- |
-| D1 | Over 200 lines | the whole file (230 lines) | Cut what Claude can read from the code (D9, Architecture, Database schema, Error codes, Dependencies, API endpoints) and the generic lines, to get under 200 |
+| D1 | Over 200 lines | the whole file (231 lines) | Cut what Claude can read from the code (D9, Architecture, Database schema, Error codes, Dependencies, API endpoints) and the generic lines, to get under 200 |
 | D2 | A dense paragraph of rules | "Working rules" | Split it into bullets under a heading, each rule with its reason |
 | D3 | Pressure language | "IMPORTANT: you MUST ALWAYS run `pnpm test`…NEVER skip this!!" | Say it plainly ("Run `pnpm test` before you commit"), or a Stop hook if it must always happen |
 | D4 | A command that doesn't exist | `pnpm run lint:all`; `package.json` has only `lint` | `pnpm lint` |
