@@ -2,7 +2,7 @@
 id: AP-26
 type: task
 title: Measure the style with the excerpts
-status: in-progress
+status: done
 priority: medium
 owner: claude
 created: 2026-11-16
@@ -24,3 +24,5 @@ Done when a dated note in `.project/docs/notes/` compares the scores with AP-24'
 - 2026-11-16 17:52 claude: Excerpts run (1bebb39), 3 runs per arm, $5.58, 161s. With the plugin vs 0.1.0: mean 159 vs 143 words, bold 21 vs 12, hedge-like 5 vs 8, hedges 0 and filler 0 in both, right answers 18/18 in both. The two no-plugin arms differ by 4 words, 3 bold and 4 hedge-like, so the longer replies and extra bold are past the noise and the hedge-like drop isn't. Reverted the excerpts.
 - 2026-11-16 17:52 claude: done subtask: Write the note
 - 2026-11-16 17:52 claude: done subtask: Record the decision
+- 2026-11-16 17:53 claude: Merged in PR #124.
+- 2026-11-16 17:53 claude: moved to done
