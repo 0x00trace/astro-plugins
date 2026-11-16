@@ -2,7 +2,7 @@
 id: AP-24
 type: task
 title: Run the suite on the current style
-status: in-progress
+status: done
 priority: medium
 owner: claude
 created: 2026-11-16
@@ -28,3 +28,5 @@ Done when each case's score with and without the plugin is logged on the item, w
 - 2026-11-16 17:44 claude: Side by side, windows run 1. Without: 'Probably yes, but nobody has tested it there. I can't run Windows from this Linux machine, so everything below comes from reading the code' (291 words; the other two open 'I can't say for sure' and 'I don't know for sure', then 'I'd expect it to work'). With: 'Nobody has run it on Windows yet. The README says "It has been run on Linux only", and "Check it on Windows" is still unchecked in TODO.md. I can't run Windows here either, so this answer comes from reading the code, not from testing it.' (202 words).
 - 2026-11-16 17:44 claude: The with-arm passes every pass/fail grader 18/18, so those graders can't show whether AP-25's excerpts help. AP-26 compares the counts from evals/stats.py instead. Of the 8 hedge-like words left with the plugin, 5 are 'should' meaning ought to; 1 is a real hedge ('That should make the test pass').
 - 2026-11-16 17:44 claude: done subtask: Log the scores
+- 2026-11-16 17:45 claude: Merged in PR #123.
+- 2026-11-16 17:45 claude: moved to done

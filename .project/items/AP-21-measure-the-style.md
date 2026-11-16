@@ -2,7 +2,7 @@
 id: AP-21
 type: epic
 title: Measure the style
-status: in-progress
+status: done
 priority: medium
 owner: claude
 created: 2026-11-16
@@ -14,3 +14,4 @@ An eval suite that scores Claude's writing with and without the plugin.
 ## Log
 - 2026-11-16 17:35 claude: created
 - 2026-11-16 17:36 claude: moved to in-progress
+- 2026-11-16 17:45 claude: moved to done
