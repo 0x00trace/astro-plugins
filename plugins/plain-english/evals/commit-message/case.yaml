@@ -1,0 +1,15 @@
+schema_version: "1.1"
+name: commit-message
+description: >
+  Writing a commit message for the change that fixes the bulk discount threshold.
+expected_outcome: >
+  The message says the bulk discount now applies to a line of exactly 10 items.
+tags: [writing]
+context:
+  scaffold_script: setup.sh
+execution:
+  max_turns: 30
+  timeout_seconds: 600
+  allowed_tools: [Read, Grep, Glob, Bash]
+  append_system_prompt: This folder is not a git repository, and git can't run in this environment.
+  prompt: "Write a commit message for fix.diff."

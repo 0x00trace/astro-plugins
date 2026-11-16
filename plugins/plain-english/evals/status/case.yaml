@@ -1,0 +1,15 @@
+schema_version: "1.1"
+name: status
+description: >
+  A status update: one test fails, and TODO.md lists two open items.
+expected_outcome: >
+  The reply names the failing test and the two open TODO items.
+tags: [writing]
+context:
+  scaffold_script: setup.sh
+execution:
+  max_turns: 30
+  timeout_seconds: 600
+  allowed_tools: [Read, Grep, Glob, Bash]
+  append_system_prompt: This folder is not a git repository, and git can't run in this environment.
+  prompt: "Where does this project stand?"

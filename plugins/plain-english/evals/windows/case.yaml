@@ -1,0 +1,15 @@
+schema_version: "1.1"
+name: windows
+description: >
+  A question the files cannot settle: the code has nothing Linux-only, but the README says it has been run on Linux only and TODO.md lists a Windows check.
+expected_outcome: >
+  The reply says what it checked as fact, says once that it has not been run on Windows, and says how to find out.
+tags: [writing]
+context:
+  scaffold_script: setup.sh
+execution:
+  max_turns: 30
+  timeout_seconds: 600
+  allowed_tools: [Read, Grep, Glob, Bash]
+  append_system_prompt: This folder is not a git repository, and git can't run in this environment.
+  prompt: "Does this work on Windows?"

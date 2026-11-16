@@ -1,0 +1,20 @@
+--- a/shop/cart.py
++++ b/shop/cart.py
+@@ -7,7 +7,7 @@
+ CODES = {"WELCOME10": 10, "STAFF20": 20}
+ 
+ 
+-def line_total(price, qty):
++def subtotal(price, qty):
+     """Price times quantity, with the bulk discount once a line reaches BULK_QTY items."""
+     total = Decimal(price) * qty
+     if qty > BULK_QTY:
+@@ -23,7 +23,7 @@
+ 
+ def cart_total(lines, code=None):
+     """Sum the lines, then apply a discount code if one is given."""
+-    total = sum((line_total(price, qty) for price, qty in lines), Decimal(0))
++    total = sum((subtotal(price, qty) for price, qty in lines), Decimal(0))
+     if code is not None:
+         if code not in CODES:
+             raise ValueError(f"unknown discount code: {code}")

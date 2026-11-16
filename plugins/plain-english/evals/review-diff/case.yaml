@@ -1,0 +1,15 @@
+schema_version: "1.1"
+name: review-diff
+description: >
+  Reviewing a change that renames line_total to subtotal in shop/cart.py and misses its other callers.
+expected_outcome: >
+  The reply says the rename breaks shop/receipt.py and the tests, which still import line_total.
+tags: [writing]
+context:
+  scaffold_script: setup.sh
+execution:
+  max_turns: 30
+  timeout_seconds: 600
+  allowed_tools: [Read, Grep, Glob, Bash]
+  append_system_prompt: This folder is not a git repository, and git can't run in this environment.
+  prompt: "Will rename.diff break anything?"
