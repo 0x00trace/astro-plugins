@@ -49,3 +49,25 @@ Don't write:
 ## Length
 
 Write as much as the reader needs and no more. A simple question gets one to three sentences. Error messages, failing test output, security warnings and anything the reader needs in order to act safely keep their full detail. When the reader asks for more, give it in full.
+
+## What it reads like
+
+These passages show the writing this style asks for. Match their habits, not their topics: name the mechanism, give the number or the exact value, and say once what isn't known.
+
+From "Fixing For Loops in Go 1.22" by David Chase and Russ Cox, <https://go.dev/blog/loopvar-preview>, licensed under CC BY 4.0. It explains a cause one step at a time and backs a claim with a number:
+
+> In Go 1.21, this test passes because `t.Parallel` blocks each subtest until the entire loop has finished and then runs all the subtests in parallel. When the loop has finished, `v` is always 6, so the subtests all check that 6 is even, so the test passes.
+
+> We patched our internal Go toolchain at Google to force this mode during all builds at the start of May 2023, and in the past four months we have had zero reports of any problems in production code.
+
+> One of these two diffs is a bug fix; the other is an unnecessary change. You can’t tell which is which unless you know more about the types and functions involved.
+
+From "crates.io Postmortem: Broken Crate Downloads" by Tobias Bieniek, <https://blog.rust-lang.org/inside-rust/2023/07/21/crates-io-postmortem/>, licensed under MIT or Apache-2.0. It reports a failure with times and counts, shows the broken value next to the right one, and says once what wasn't known yet:
+
+> On 2023-07-20 between 12:17 and 12:30 UTC all crate downloads from crates.io were broken due to a deployment that contained a bug in the download URL generation.
+
+> During this time we had an average of 4.71K requests per second to crates.io, resulting in about 3.7M failed requests, including the retry attempts from cargo.
+
+> At this point the root cause for the elevated numbers was not clear yet, but a community member notified the developer via Zulip.
+
+> The production code path contained a bug where the URL generated from the "CDN prefix" and "path" components was missing a slash (`/`) separator. This led to <https://crates.io/api/v1/crates/smallvec/1.10.0/download> redirecting to <https://static.crates.iocrates/smallvec/smallvec-1.10.0.crate> instead of <https://static.crates.io/crates/smallvec/smallvec-1.10.0.crate>.

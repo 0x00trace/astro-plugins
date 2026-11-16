@@ -1,6 +1,6 @@
 # plain-english
 
-Makes Claude write in plain English, the way good technical docs read: the answer first, short sentences, common words, and the actual file, command or number named. It leaves out hedging ("I think", "probably", "should work"), filler ("just", "really", "it's worth noting"), openers and closers ("Great question", "Hope this helps"), buzzwords and em dashes. The rules apply to everything Claude writes: replies, plans, code comments, commit messages, docs and subagent reports. They're in [`output-styles/plain-english.md`](output-styles/plain-english.md).
+Makes Claude write in plain English, the way good technical docs read: the answer first, short sentences, common words, and the actual file, command or number named. It leaves out hedging ("I think", "probably", "should work"), filler ("just", "really", "it's worth noting"), openers and closers ("Great question", "Hope this helps"), buzzwords and em dashes. The rules apply to everything Claude writes: replies, plans, code comments, commit messages, docs and subagent reports. They're in [`output-styles/plain-english.md`](output-styles/plain-english.md), which ends with passages from a Go blog post and a crates.io postmortem as examples of the writing it asks for.
 
 ```
 /plugin install plain-english --marketplace astrosteveo/astro-plugins
@@ -68,3 +68,10 @@ python3 plugins/plain-english/evals/stats.py plugins/plain-english/evals/results
 - `stats.py` counts words, hedges, filler and bold in each reply. With the plugin, every grader passes in all 18 writing runs, so the counts show differences the pass/fail graders can't.
 - On Claude Opus 5.5 with Claude Code 2.1.326, a run of the whole suite costs about $5.50 and takes about 3 minutes.
 - Results go to `evals/results/`, which git ignores.
+
+## Credits
+
+The style's examples quote two posts, unchanged apart from the cuts:
+
+- "[Fixing For Loops in Go 1.22](https://go.dev/blog/loopvar-preview)" by David Chase and Russ Cox, on the Go blog, under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+- "[crates.io Postmortem: Broken Crate Downloads](https://blog.rust-lang.org/inside-rust/2023/07/21/crates-io-postmortem/)" by Tobias Bieniek, on the Rust blog, under the [MIT](https://github.com/rust-lang/blog.rust-lang.org/blob/main/LICENSE-MIT) or [Apache-2.0](https://github.com/rust-lang/blog.rust-lang.org/blob/main/LICENSE-APACHE) license.
