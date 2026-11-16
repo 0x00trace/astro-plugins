@@ -2,7 +2,7 @@
 id: AP-20
 type: task
 title: Drop github-tracking, and make telling Claude how to work a non-goal
-status: in-progress
+status: done
 priority: high
 owner: claude
 created: 2026-11-16
@@ -16,8 +16,8 @@ Done when: plugins/github-tracking and its marketplace entry are gone, PROJECT.m
 - [x] Move the opinion rules to ~/.claude/CLAUDE.md (Tracking work, Docs, branch default)
 - [x] Delete plugins/github-tracking and its marketplace entry
 - [x] Reword PROJECT.md: list, problem, Decisions, Status
-- [ ] Add the non-goal and its Decisions line
-- [ ] Validate the marketplace and run every plugin's tests
+- [x] Add the non-goal and its Decisions line
+- [x] Validate the marketplace and run every plugin's tests
 
 ## Log
 - 2026-11-16 15:40 claude: created
@@ -25,3 +25,6 @@ Done when: plugins/github-tracking and its marketplace entry are gone, PROJECT.m
 - 2026-11-16 15:40 claude: done subtask: Move the opinion rules to ~/.claude/CLAUDE.md (Tracking work, Docs, branch default)
 - 2026-11-16 15:40 claude: done subtask: Delete plugins/github-tracking and its marketplace entry
 - 2026-11-16 15:40 claude: done subtask: Reword PROJECT.md: list, problem, Decisions, Status
+- 2026-11-16 15:40 claude: done subtask: Add the non-goal and its Decisions line
+- 2026-11-16 15:41 claude: done subtask: Validate the marketplace and run every plugin's tests
+- 2026-11-16 16:03 claude: moved to done

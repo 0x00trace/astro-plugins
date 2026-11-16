@@ -24,6 +24,7 @@ The author: a solo developer on Linux who uses Claude Code for hobby projects. T
 
 - Settings or features for needs other than the author's, such as team or org setups. Why: these are personal plugins for solo hobby projects.
 - Doing what Claude Code already does itself. A plugin is dropped once Claude Code ships the same feature. Why: a plugin like that is upkeep with no gain.
+- Telling Claude how to work, such as git, planning or docs habits. A plugin says how its own tools work and what they need. Why: how the author works belongs in their CLAUDE.md, so taking a plugin's function doesn't mean taking a workflow with it.
 
 ## Success looks like
 
@@ -64,6 +65,7 @@ The author: a solo developer on Linux who uses Claude Code for hobby projects. T
 - 2026-11-14: Dropped the gates that refused `git add -A` and `git commit -a`. The plugins don't set rules for how to use Git. Why: how the author stages and commits belongs in their CLAUDE.md and each repo's rules.
 - 2026-11-15: instructions' review runs Claude Code's bundled prompt audit on each file under review, and adds a short check list from the memory docs for what the audit doesn't cover. Why: the review rested on one sentence, and a copy of the audit's rubric would go stale with each Claude Code release ([0001](.project/docs/decisions/0001-review-runs-the-prompt-audit.md)).
 - 2026-11-16: Dropped github-tracking. Why: corkboard tracks the work in the repo.
+- 2026-11-16: Plugins don't tell Claude how to work (Non-goals). The workflow and docs rules in corkboard's skills moved to the author's global CLAUDE.md, and its skills now say how corkboard works and what it needs. plain-english is the exception on purpose: a writing style is what it ships. Why: a review of every plugin found workflow rules riding along with corkboard's tracker and docs, so taking the function meant taking the workflow too.
 
 ## Open questions
 
