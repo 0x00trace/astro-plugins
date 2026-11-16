@@ -29,3 +29,4 @@ Done when the section is in the style, `test_style.py` checks it, and the unit t
 - 2026-11-16 17:47 claude: try-plugin, Claude Code 2.1.326, Fable 5.2: the main session and an Explore subagent both quoted 'These passages show the writing this style asks for.' The subagent's transcript has it in a hook_additional_context row. The new test fails when the CC BY credit is removed.
 - 2026-11-16 17:48 claude: moved to waiting: Committed in 1bebb39; merges with the 0.2.0 PR after AP-26 measures it
 - 2026-11-16 17:52 claude: moved to cancelled: Reverted in ee2b351 after AP-26: the passages made replies longer and added bold, with no measurable drop in hedging
+- 2026-11-16 17:53 claude: The rebase merge of PR #124 renamed the commits: 1bebb39 is 39836e6 on main, and the revert ee2b351 is 83feaaa.

@@ -26,3 +26,4 @@ Done when a dated note in `.project/docs/notes/` compares the scores with AP-24'
 - 2026-11-16 17:52 claude: done subtask: Record the decision
 - 2026-11-16 17:53 claude: Merged in PR #124.
 - 2026-11-16 17:53 claude: moved to done
+- 2026-11-16 17:53 claude: On main, the excerpts commit is 39836e6 and the revert is 83feaaa (1bebb39 and ee2b351 before the rebase merge).

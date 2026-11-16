@@ -4,7 +4,7 @@ Does plain-english change how Claude writes, and do passages from professional w
 
 ## Found
 
-The plugin's eval suite (`plugins/plain-english/evals/`, PR #123) ran twice: once on 0.1.0 and once with the passages added (commit 1bebb39). Each run had 6 writing cases, with 3 runs per case with the plugin and 3 without. Claude Opus 5.5 wrote the replies on Claude Code 2.1.326, and Sonnet 5.5 judged them. The counts come from `evals/stats.py` over the 18 replies in each arm. In the no-plugin column, the first number is from the 0.1.0 run and the second from the passages run.
+The plugin's eval suite (`plugins/plain-english/evals/`, PR #123) ran twice: once on 0.1.0 and once with the passages added (commit 39836e6). Each run had 6 writing cases, with 3 runs per case with the plugin and 3 without. Claude Opus 5.5 wrote the replies on Claude Code 2.1.326, and Sonnet 5.5 judged them. The counts come from `evals/stats.py` over the 18 replies in each arm. In the no-plugin column, the first number is from the 0.1.0 run and the second from the passages run.
 
 | Over 18 replies | No plugin | 0.1.0 | 0.1.0 with the passages |
 | --- | --- | --- | --- |
