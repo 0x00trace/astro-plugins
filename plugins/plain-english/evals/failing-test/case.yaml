@@ -1,0 +1,15 @@
+schema_version: "1.1"
+name: failing-test
+description: >
+  Explaining a failing test: the cause is known once the code is read or run.
+expected_outcome: >
+  The reply names the comparison in line_total as the cause, without hedging.
+tags: [writing]
+context:
+  scaffold_script: setup.sh
+execution:
+  max_turns: 30
+  timeout_seconds: 600
+  allowed_tools: [Read, Grep, Glob, Bash]
+  append_system_prompt: This folder is not a git repository, and git can't run in this environment.
+  prompt: "test_ten_items_get_bulk_discount fails. Why?"

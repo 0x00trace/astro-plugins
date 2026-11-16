@@ -1,0 +1,15 @@
+schema_version: "1.1"
+name: pick-one
+description: >
+  Choosing between two options, where the style asks for one recommendation and its reason.
+expected_outcome: >
+  The reply recommends one format and says why in a sentence or two.
+tags: [writing]
+context:
+  scaffold_script: setup.sh
+execution:
+  max_turns: 30
+  timeout_seconds: 600
+  allowed_tools: [Read, Grep, Glob, Bash]
+  append_system_prompt: This folder is not a git repository, and git can't run in this environment.
+  prompt: "I want to save carts between runs. Should I store them as JSON or pickle?"

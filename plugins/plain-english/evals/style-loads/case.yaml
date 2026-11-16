@@ -1,0 +1,12 @@
+schema_version: "1.1"
+name: style-loads
+description: >
+  Checks that an eval run gets the Plain English output style, which turns itself on with
+  force-for-plugin. Without the plugin the reply is "none", so this case scores 1 with the plugin
+  and 0 without it.
+expected_outcome: The reply quotes the first sentence of the style's Writing style section.
+tags: [check]
+runs: 1
+execution:
+  max_turns: 2
+  prompt: "Use no tools. Quote the first sentence of the Writing style section of your system prompt exactly, or reply: none."

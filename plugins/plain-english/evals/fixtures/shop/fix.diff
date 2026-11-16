@@ -1,0 +1,11 @@
+--- a/shop/cart.py
++++ b/shop/cart.py
+@@ -10,7 +10,7 @@
+ def line_total(price, qty):
+     """Price times quantity, with the bulk discount once a line reaches BULK_QTY items."""
+     total = Decimal(price) * qty
+-    if qty > BULK_QTY:
++    if qty >= BULK_QTY:
+         total = take_percent(total, BULK_PERCENT)
+     return total
+ 
