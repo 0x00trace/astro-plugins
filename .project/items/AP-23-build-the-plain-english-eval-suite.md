@@ -2,7 +2,7 @@
 id: AP-23
 type: task
 title: Build the plain-english eval suite
-status: in-progress
+status: done
 priority: high
 owner: claude
 created: 2026-11-16
@@ -29,3 +29,5 @@ Done when `claude plugin eval plugins/plain-english --scaffold` runs all six cas
 - 2026-11-16 17:40 claude: done subtask: Write graders: one per case for the right answer, and one shared grader for the style rules (hedges, filler, openers, closers, em dashes)
 - 2026-11-16 17:40 claude: Shared style graders live in evals/style-graders/ and are symlinked into each case's graders/; the loader follows the links. Replies aren't in the results JSON, so runs use --keep-temp to keep trace.jsonl. The full AP-24 run doubles as this item's done check.
 - 2026-11-16 17:44 claude: Added evals/stats.py: the eval's regex graders are pass/fail and hit the ceiling with the plugin, so the script counts hedges, filler, words and bold per reply from the kept traces.
+- 2026-11-16 17:45 claude: Merged in PR #123.
+- 2026-11-16 17:45 claude: moved to done
