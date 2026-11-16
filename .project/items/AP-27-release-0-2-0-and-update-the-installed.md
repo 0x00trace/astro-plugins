@@ -2,7 +2,7 @@
 id: AP-27
 type: task
 title: Release 0.2.0 and update the installed plugin
-status: todo
+status: cancelled
 priority: medium
 owner: claude
 created: 2026-11-16
@@ -21,3 +21,4 @@ Done when the PR is merged, the installed copy reports 0.2.0, and a try-plugin c
 
 ## Log
 - 2026-11-16 17:35 claude: created
+- 2026-11-16 17:52 claude: moved to cancelled: Nothing to release: AP-26 took the passages back out, so plain-english stays at 0.1.0

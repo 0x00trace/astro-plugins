@@ -2,7 +2,7 @@
 id: AP-25
 type: task
 title: Add the Go and crates.io excerpts to the style
-status: in-progress
+status: cancelled
 priority: medium
 owner: claude
 created: 2026-11-16
@@ -27,3 +27,5 @@ Done when the section is in the style, `test_style.py` checks it, and the unit t
 - 2026-11-16 17:47 claude: done subtask: Update `test_style.py`
 - 2026-11-16 17:47 claude: done subtask: Check in a try-plugin session that a subagent gets the section
 - 2026-11-16 17:47 claude: try-plugin, Claude Code 2.1.326, Fable 5.2: the main session and an Explore subagent both quoted 'These passages show the writing this style asks for.' The subagent's transcript has it in a hook_additional_context row. The new test fails when the CC BY credit is removed.
+- 2026-11-16 17:48 claude: moved to waiting: Committed in 1bebb39; merges with the 0.2.0 PR after AP-26 measures it
+- 2026-11-16 17:52 claude: moved to cancelled: Reverted in ee2b351 after AP-26: the passages made replies longer and added bold, with no measurable drop in hedging
