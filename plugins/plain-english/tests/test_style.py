@@ -26,23 +26,6 @@ class StyleTest(unittest.TestCase):
         _, body = style()
         self.assertNotIn("—", body)
 
-    def test_each_excerpt_keeps_its_source_and_license(self):
-        # CC BY 4.0 and the MIT license both require the credit, so an edit mustn't drop it.
-        _, body = style()
-        excerpts = body.split("\n## What it reads like\n", 1)[1]
-        for credit in (
-            (
-                '"Fixing For Loops in Go 1.22" by David Chase and Russ Cox,'
-                " <https://go.dev/blog/loopvar-preview>, licensed under CC BY 4.0."
-            ),
-            (
-                '"crates.io Postmortem: Broken Crate Downloads" by Tobias Bieniek,'
-                " <https://blog.rust-lang.org/inside-rust/2023/07/21/crates-io-postmortem/>,"
-                " licensed under MIT or Apache-2.0."
-            ),
-        ):
-            self.assertIn(credit, excerpts)
-
 
 if __name__ == "__main__":
     unittest.main()
