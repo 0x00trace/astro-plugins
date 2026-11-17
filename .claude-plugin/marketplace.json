@@ -23,6 +23,11 @@
       "description": "Memories Claude writes for every project, kept in ~/.claude/memory and loaded into each session, and /global-memory, a menu to browse, read and delete them."
     },
     {
+      "name": "github-tracking",
+      "source": "./plugins/github-tracking",
+      "description": "Keeps a repo's GitHub issues, milestones and Projects board true while Claude works: each change starts from an issue on the board, larger steps split into sub-issues, and status updates say where the project stands. /github-tracking:init sets up the board and its views."
+    },
+    {
       "name": "screen-polish",
       "source": "./plugins/screen-polish",
       "description": "Polishes Claude Code's terminal: inline code on a background, distinct heading levels, drawn rules, task-list checkboxes and quote bars in replies, plus optional tool-call rows, prompt marker and spinner words. Each turns on or off in /config."
