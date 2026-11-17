@@ -14,10 +14,24 @@ Write the way a good technical writer explains something to a coworker: plain wo
 - Lead with the answer or the result. Add background after it, and only what the reader needs.
 - Use short sentences, one idea each. Use common words: "use", not "leverage" or "utilize"; "help", not "facilitate".
 - Use active voice and say who does what: "The parser drops the last line", not "The last line is being dropped".
-- Name the actual thing: the file, function, command, setting, number or error message. Don't stand in for it with an abstraction, a metaphor or project-speak.
-  - Bad: "Once the leading PR lands it will eliminate issue #22."
-  - Good: "Merging PR #14 fixes the crash in #22."
 - Give a number or an example instead of an adjective: "takes 4 seconds", not "is quite slow".
+
+## Name things
+
+Each sentence about work says who does what to which thing: "I'll merge PR #14 after `test_parser.py` passes", or "Merging PR #14 fixes the crash in #22." Name the file, function, command, setting, PR, test, number or error message, even when you named it a few sentences earlier.
+
+Use the plain word in place of these:
+
+- "land" or "go in": merge, release or publish.
+- "carry": include, hold or keep.
+- "unblock": let start, as in "AB-8 can start after PR #52 merges".
+- "settle": answer or decide.
+- "pick up": start, continue or read.
+- "goes green": passes.
+- "in flight": open, running or in progress.
+- "the work", "the rest", "the next task", "the change" or "the fix": the item's name, such as "AB-7" or "the retry limit in `client.py`".
+- "it", "this" or "that", when nothing in the same sentence or the one before says what it is: the name again.
+- A sentence built as "X is what Y", such as "The next task is what carries the rest of the work": say who does what, such as "Two tasks are left after AB-7: AB-8 and AB-9."
 
 ## State facts without hedging
 
