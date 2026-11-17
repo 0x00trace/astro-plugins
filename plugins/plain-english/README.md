@@ -41,7 +41,10 @@ python3 -m unittest discover -s plugins/plain-english/tests
 
 ### Evals
 
-`evals/` holds seven [`claude plugin eval`](https://code.claude.com/docs/en/plugin-evals) cases, and each runs with and without the plugin. `style-loads` checks that an eval run gets the output style. The other six copy `evals/fixtures/shop` into an empty folder and ask a question about it. The fixture is a small Python cart with one planted bug: the bulk discount starts at 11 items, while its docstring and test say 10.
+`evals/` holds ten [`claude plugin eval`](https://code.claude.com/docs/en/plugin-evals) cases, and each runs with and without the plugin. `style-loads` checks that an eval run gets the output style. The other nine copy a fixture into an empty folder and ask a question about it:
+
+- `evals/fixtures/shop` is a small Python cart with one planted bug: the bulk discount starts at 11 items, while its docstring and test say 10.
+- `evals/fixtures/release` describes a release in progress: a task list, two open pull requests and the CI log of a test that fails on macOS. Its questions ask for status and next steps, where stand-ins such as "the work" or "once it lands" show up.
 
 | Case | Prompt | The answer is right when it |
 | --- | --- | --- |
@@ -52,8 +55,14 @@ python3 -m unittest discover -s plugins/plain-english/tests
 | `windows` | Does this work on Windows? | says what it checked, that nobody has run it on Windows, and how to find out |
 | `commit-message` | Write a commit message for `fix.diff` | says the discount now starts at 10 items |
 | `status` | Where does this project stand? | names the failing test and the two open TODO items |
+| `release-status` | Where does the 1.4 release stand? | names each task and PR and what each waits on |
+| `next-step` | What should I do next to get 1.4 out? | starts with the macOS test failure in PR #33 |
+| `merge-today` | Can we merge #33 today? | says no, names `test_write_receipt` and its cause, and says how to fix it |
 
-Each of the six has an `llm` grader for the right answer and five `regex` graders, one for each word list in the style: hedges, filler, buzzwords, openers and closers, and em dashes. A `regex` grader fails a run on one match in Claude's last message. The five live in `evals/style-graders/`, and each case links to them.
+Each of the nine has an `llm` grader for the right answer, plus nine graders for the style. They live in `evals/style-graders/`, and each case links to them:
+
+- Six `regex` graders, one for each word list: hedges, filler, buzzwords, openers and closers, em dashes, and stand-in words such as "land", "carry" and "the work". A `regex` grader fails a run on one match in Claude's last message.
+- Three `llm` graders, one for each kind of stand-in: a vague reference ("it" or "the fix" with nothing named before it), a metaphor verb ("goes green" for passes), and a cleft sentence ("The next task is what carries the rest of the work").
 
 ```
 mkdir -p "$HOME/.cache/claude-plugin-eval"
@@ -65,6 +74,7 @@ python3 plugins/plain-english/evals/stats.py plugins/plain-english/evals/results
 - `TMPDIR` moves the run folders out of `/tmp`, where the eval sandbox denies Bash writes.
 - `--keep-temp` keeps each run's `trace.jsonl` under `$TMPDIR/claude-eval-*/out/`. The results JSON has the grader verdicts but not Claude's replies, and `stats.py` reads the replies from the traces.
 - `--threshold 0` keeps the exit code at 0, since the run is a measurement, not a gate.
-- `stats.py` counts words, hedges, filler and bold in each reply. With the plugin, every grader passes in all 18 writing runs, so the counts show differences the pass/fail graders can't.
-- On Claude Opus 5.5 with Claude Code 2.1.326, a run of the whole suite costs about $5.50 and takes about 3 minutes.
+- `stats.py` counts words, hedges, filler, bold and stand-in words in each reply. A grader passes or fails a whole reply, so the counts show differences between two runs that the graders can't.
+- Add `--model claude-fable-5-2` or another model ID to test the style on that model.
+- With Claude Code 2.1.326, a run of the whole suite costs about $10 on Claude Opus 5.5 and about $20 on Claude Fable 5.2, and takes about 7 minutes on either.
 - Results go to `evals/results/`, which git ignores.

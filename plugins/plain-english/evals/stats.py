@@ -30,7 +30,14 @@ FILLER = re.compile(
     r"\b(just|simply|actually|basically|really|very|quite|honestly|genuinely|essentially)\b",
     re.IGNORECASE,
 )
-COLUMNS = ("runs", "words", "hedges", "hedge-like", "filler", "bold")
+# The list evals/style-graders/no-stand-in-words.md checks: words that stand in for the thing or
+# action the reader needs, such as "land" for merge and "the work" for a named task.
+STAND_INS = re.compile(
+    r"\b(land|lands|landed|landing|carr(y|ies|ied|ying)|unblock\w*|in flight|on deck|pick(s|ed)? up)\b"
+    r"|\bthe (rest of the |remaining )?work\b|\b(is|are|was) what\b",
+    re.IGNORECASE,
+)
+COLUMNS = ("runs", "words", "hedges", "hedge-like", "filler", "bold", "stand-ins")
 
 
 def final_reply(trace_path):
@@ -56,6 +63,7 @@ def counts(replies):
         sum(len(HEDGE_LIKE.findall(r)) for r in replies),
         sum(len(FILLER.findall(r)) for r in replies),
         sum(r.count("**") // 2 for r in replies),
+        sum(len(STAND_INS.findall(r)) for r in replies),
     )
 
 

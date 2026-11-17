@@ -1,0 +1,15 @@
+schema_version: "1.1"
+name: next-step
+description: >
+  Asking for the next step, where the answer is to fix the macOS test failure in PR #33.
+expected_outcome: >
+  The reply recommends fixing test_write_receipt in PR #33 first, and names what follows, without stand-ins.
+tags: [writing, stand-ins]
+context:
+  scaffold_script: setup.sh
+execution:
+  max_turns: 20
+  timeout_seconds: 600
+  allowed_tools: [Read, Grep, Glob]
+  append_system_prompt: This folder is not a git repository, and git and gh can't run in this environment. The files in it describe the project's release, tasks and pull requests.
+  prompt: "What should I do next to get 1.4 out?"

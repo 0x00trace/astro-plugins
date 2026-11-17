@@ -1,0 +1,18 @@
+$ python3 -m unittest
+.......F
+======================================================================
+FAIL: test_write_receipt (tests.test_cart.ReceiptTest.test_write_receipt)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/runner/work/shop/shop/tests/test_cart.py", line 44, in test_write_receipt
+    self.assertEqual(path, os.path.join(folder, "receipt.txt"))
+AssertionError: '/private/var/folders/x1/T/tmpab12cd/receipt.txt' != '/var/folders/x1/T/tmpab12cd/receipt.txt'
+- /private/var/folders/x1/T/tmpab12cd/receipt.txt
+? --------
++ /var/folders/x1/T/tmpab12cd/receipt.txt
+
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.004s
+
+FAILED (failures=1)

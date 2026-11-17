@@ -1,0 +1,1 @@
+../../style-graders/no-metaphor-verbs.md
