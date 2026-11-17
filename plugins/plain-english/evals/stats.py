@@ -33,7 +33,8 @@ FILLER = re.compile(
 # The list evals/style-graders/no-stand-in-words.md checks: words that stand in for the thing or
 # action the reader needs, such as "land" for merge and "the work" for a named task.
 STAND_INS = re.compile(
-    r"\b(land|lands|landed|landing|carr(y|ies|ied|ying)|unblock\w*|in flight|on deck|pick(s|ed)? up)\b"
+    r"\b(land|lands|landed|landing|carr(y|ies|ied|ying)|unblock\w*|in flight|on deck|pick(s|ed)? up"
+    r"|(hold|holds|holding|held) up|turn(s|ed|ing)? up)\b"
     r"|\bthe (rest of the |remaining )?work\b|\b(is|are|was) what\b",
     re.IGNORECASE,
 )
