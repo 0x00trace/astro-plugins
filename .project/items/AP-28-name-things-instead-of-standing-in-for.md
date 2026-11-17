@@ -2,7 +2,7 @@
 id: AP-28
 type: epic
 title: Name things instead of standing in for them
-status: in-progress
+status: done
 priority: medium
 owner: claude
 created: 2026-11-16
@@ -14,3 +14,4 @@ Measure how often Claude writes stand-ins in status and plan text, then rewrite 
 ## Log
 - 2026-11-16 18:09 claude: created
 - 2026-11-16 18:09 claude: moved to in-progress
+- 2026-11-16 18:47 claude: moved to done
