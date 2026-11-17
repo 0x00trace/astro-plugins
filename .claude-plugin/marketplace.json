@@ -40,7 +40,7 @@
     {
       "name": "plain-english",
       "source": "./plugins/plain-english",
-      "description": "Makes Claude write in plain English, like good technical docs: the answer first, short sentences, no hedging, filler or em dashes. An output style for the main conversation and forks, and the same instructions handed to every subagent."
+      "description": "Makes Claude write in plain English, like good technical docs: the answer first, short sentences, things called by their names, no hedging, filler or em dashes. An output style for the main conversation and forks, and the same instructions handed to every subagent."
     },
     {
       "name": "instructions",
