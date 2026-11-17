@@ -1,1 +1,0 @@
-../../style-graders/no-vague-references.md
