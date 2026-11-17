@@ -19,7 +19,7 @@ uv run --python 3.11 --no-project python -m unittest discover -s plugins/<name>/
 
 Run only the tests a plugin has: `claude plugin test` fails with "no hooks module to load" on a plugin without hooks, and unittest exits 5 with "NO TESTS RAN" on one without `test_*.py`.
 
-The Python tests check the exact wording of SKILL.md files, plain-english's output style, and bug-hunt's README and `agents/hunter.md`, and that a skill's `allowed-tools` lists every command its body names. Rerun them after rewording any of these.
+The Python tests check the exact wording of SKILL.md files, plain-english's output style, and bug-hunt's README and `agents/hunter.md`, and the exact commands each skill's `allowed-tools` pre-approves. github-tracking's init leaves `gh project create` and `gh project link` out on purpose, so the user approves each change to GitHub. Rerun the tests after rewording any of these files.
 
 ## Writing a plugin
 
