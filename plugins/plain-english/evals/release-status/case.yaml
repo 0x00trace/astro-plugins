@@ -1,0 +1,15 @@
+schema_version: "1.1"
+name: release-status
+description: >
+  A status update on a release with one task done, one PR approved but failing on macOS, one task blocked on that PR, and a draft of the release notes.
+expected_outcome: >
+  The reply names each task and PR and says what each waits on, without stand-ins.
+tags: [writing, stand-ins]
+context:
+  scaffold_script: setup.sh
+execution:
+  max_turns: 20
+  timeout_seconds: 600
+  allowed_tools: [Read, Grep, Glob]
+  append_system_prompt: This folder is not a git repository, and git and gh can't run in this environment. The files in it describe the project's release, tasks and pull requests.
+  prompt: "Where does the 1.4 release stand?"

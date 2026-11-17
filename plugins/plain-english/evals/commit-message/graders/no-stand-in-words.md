@@ -1,0 +1,1 @@
+../../style-graders/no-stand-in-words.md

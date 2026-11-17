@@ -1,0 +1,1 @@
+../../style-graders/no-openers-or-closers.md
