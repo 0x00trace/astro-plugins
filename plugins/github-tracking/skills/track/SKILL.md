@@ -1,14 +1,14 @@
 ---
 name: track
-description: Use before you open, start, file, plan or finish any issue, PR or change in a repo with a GitHub remote, and before you say where a project stands. Keeps the repo's issues, milestones and board true, so the user can see on GitHub where the project stands: each change starts from an issue on the board, PRs close their issues, a larger step is a parent issue split into sub-issues, and status updates say what's done and next. Its script makes the board's API calls, so no project ids are needed. When the repo has no board, it offers /github-tracking:init.
+description: Use in a repo with a GitHub remote before you open, start, file or finish an issue or PR, and before you say where a project stands. Says how the repo's issues, milestones and GitHub Projects board work, and how its script moves items, makes sub-issues and posts status updates, so the board stays true as you work. When the repo has no board, it offers /github-tracking:init.
 allowed-tools: Bash(python3 ${CLAUDE_PLUGIN_ROOT}/scripts/board.py *)
 ---
 
 # Track work on GitHub
 
-The user follows each project on GitHub instead of asking: its issues, its milestones, and a Projects board linked to the repo, with a Status of Todo, In Progress or Done. Keep all three true as you work. A change that isn't on the board, or a board that says something is in progress when it merged a day ago, misleads them.
+A repo's work on GitHub is its issues, its milestones, and a Projects board linked to the repo. Each issue and PR on the board has a Status: Todo, In Progress or Done. The user reads the board to see where the project stands, so keep it true as you work. An issue still at In Progress a day after its PR merged misleads them.
 
-`board.py` makes the board's API calls. It finds the board linked to the repo you're in and that board's Status field, so no CLAUDE.md needs to keep a project's ids. Pass `--repo OWNER/NAME` to work on another repo's board, and `--project NUMBER` when a repo has more than one.
+`board.py` makes the board's API calls through `gh`. It finds the board linked to the repo you're in and that board's Status field, so no CLAUDE.md needs to keep a project's ids. Pass `--repo OWNER/NAME` to work on another repo's board, and `--project NUMBER` when a repo has more than one.
 
 ```
 python3 ${CLAUDE_PLUGIN_ROOT}/scripts/board.py show                    # where the board stands
@@ -17,44 +17,31 @@ python3 ${CLAUDE_PLUGIN_ROOT}/scripts/board.py sub 10 11 12 13         # 11, 12 
 python3 ${CLAUDE_PLUGIN_ROOT}/scripts/board.py update on-track FILE    # a status update, its body from FILE or - for stdin
 ```
 
-`move` adds the item to the board when it isn't there yet. A status update is `on-track`, `at-risk`, `off-track`, `complete` or `inactive`. If gh says it lacks the `project` scope, ask the user to run `! gh auth refresh -s project`.
+Which work gets an issue, how issues are labelled, titled and put in milestones, when to post a status update, and how to branch and commit follow the user's own rules and the repo's. This skill doesn't decide them.
 
-This skill says what to keep on GitHub, not how to do the work. Branches, commits, what belongs in a change and how issues are labelled and titled follow the user's CLAUDE.md and the repo's own rules. Those rules may also say what the repo's milestones stand for (such as one per slice) or which issue is a larger step's parent. Where they say something, follow them over this skill.
+## What GitHub does on its own, and what it doesn't
 
-## Start each change from an issue
+- A new issue or PR isn't on the board until something adds it, and the API can't turn on a board's auto-add workflow. `move` adds an item that isn't on the board yet, at the status you give.
+- A PR whose body says `Closes #N` closes issue N when it merges, and the board shows the PR in the issue's row.
+- The board's Item closed and Pull request merged workflows move an item to Done when it closes or merges. A new board has them on, and `show` lists any that are off. The API can't turn one on: the user switches it on in the board's Workflows settings.
+- The board's Auto-add sub-issues workflow puts the sub-issues `sub` makes on the board. Only an issue can be a parent or a sub-issue, not a PR.
+- A milestone stays open after its last issue closes. Close it with `gh api -X PATCH repos/OWNER/NAME/milestones/M -f state=closed`.
+- A status update is a short post on the board, with one of `on-track`, `at-risk`, `off-track`, `complete` or `inactive`. The newest one shows at the top of the board. Write its body to a file and pass the file, or `-` to read it from stdin.
 
-1. Find the change's issue (`gh issue list --search WORDS`) or open one. Give it the repo's label for its kind of change and the milestone of the step it belongs to.
-2. Put it on the board as In Progress: `board.py move N "In Progress"`. A new issue isn't on the board until something adds it, and the API can't turn on a board's auto-add workflow, so add it yourself.
+## Saying where things stand
 
-## Link the PR
+`board.py show` prints the board's URL, its open milestones with how many of their issues are closed, every item that isn't done grouped by status, and the latest status update. Answer from it, with `gh pr list` and git, rather than opening issues one by one.
 
-- The PR's body says `Closes #N` for each issue it finishes, so merging it closes them.
-- Put the PR on the board too: `board.py move PR "In Progress"`.
-- After a merge, run `board.py show`. The board's Item closed and Pull request merged workflows move both to Done; move whatever they missed. When a milestone's last issue closes, close the milestone: `gh api -X PATCH repos/OWNER/NAME/milestones/M -f state=closed`.
+`show` also marks what's out of step:
 
-## File what you find
+- `(closed)` or `(merged)` after an item that isn't at Done, and `(open)` after an open item at Done. Fix each with `move`.
+- `Workflows off:` the board's workflows that are switched off.
+- `Views missing:` the board's views of open work, milestones and recently done issues that it lacks. `/github-tracking:init` adds them, and only them.
 
-Something that turns up and doesn't go in the current change, by the user's and repo's rules or because it's bigger, gets its own issue, labelled, in the milestone it belongs to, on the board as Todo (`board.py move N Todo`). Tell the user what you filed.
+## Errors
 
-## Plan a larger step
-
-A larger step (a milestone) starts as one parent issue in that milestone, before any code:
-
-- **Today:** what exists now, naming the code it touches.
-- **Open questions:** each with your recommendation and its alternative, so the user can answer with a yes.
-- **Work:** filled in once the questions are decided.
-
-Ask the user to decide the questions. Then edit the parent: the questions become **Decided**, each with its answer. Open one issue per piece of work, in the order they'll land, each leaving the project working. Give each the step's milestone and label, make them its sub-issues (`board.py sub PARENT N...`), and list them in order under **Work**. Put any the board's Auto-add sub-issues workflow didn't add on it as Todo. Post a status update saying the step is decided and what comes first.
-
-## Post a status update
-
-Post one when a merge or a decision changes where the project stands: a step decided or split, a sub-issue that finishes part of a step, a milestone finished, a new blocker. A routine fix doesn't need one.
-
-Write a few plain lines for someone reading the board, with issues and PRs as `#N`: what's done, what's next, and what's in the way. Use `on-track` unless something blocks the work (`at-risk`, or `off-track` when the plan no longer holds), and `complete` when the project's planned work is all done. Write the body to a file and pass it: `board.py update on-track FILE`.
-
-## Say where things stand
-
-When the user asks where a project is, run `board.py show` with `git status`, `git branch -a` and `gh pr list`, and answer from them: the milestones' progress, what's in progress, what's next and what's open. `show` marks an item out of step with its issue (closed but not Done, or Done but open), lists the board's workflows that are off, and the views it's missing. Fix what's out of step. If it lists views missing, add them with `/github-tracking:init`, which adds only what the board lacks, unless the user has said they don't want them. If the latest status update no longer says where the project stands, post one.
+- If `gh` says it lacks the `project` scope, ask the user to run `! gh auth refresh -s project`.
+- If `board.py` says the repo has several boards, ask the user which one and pass `--project NUMBER` from then on.
 
 ## A repo with no board
 
