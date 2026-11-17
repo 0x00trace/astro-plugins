@@ -51,14 +51,6 @@
       "name": "instructions",
       "source": "./plugins/instructions",
       "description": "/instructions:init sets up and reviews a project's CLAUDE.md and CLAUDE.local.md and your global ~/.claude/CLAUDE.md. A fork of Claude Code's new /init that checks each file against Claude Code's docs and prompt audit, and shows every draft before writing."
-    },
-    {
-      "name": "corkboard",
-      "source": {
-        "source": "url",
-        "url": "https://github.com/astrosteveo/corkboard.git"
-      },
-      "description": "A local issue tracker and wiki kept as Markdown in the repo's .project/ folder. Claude tracks its work with the corkboard command, each session starts with what's in progress, what's next and what's waiting on you, and /corkboard:plan, /corkboard:next and /corkboard:done run the workflow."
     }
   ]
 }
