@@ -48,6 +48,11 @@
       "description": "Makes Claude write in plain English, like good technical docs: the answer first, short sentences, things called by their names, no hedging, filler or em dashes. An output style for the main conversation and forks, and the same instructions handed to every subagent."
     },
     {
+      "name": "docs-site",
+      "source": "./plugins/docs-site",
+      "description": "/docs-site:init sets up a repo's docs site in one script run: a mkdocs.yml with no nav list, a docs home page and site/ in .gitignore, so `uvx zensical serve` shows the Markdown in docs/ with a sidebar, sections and search. It keeps any file that exists."
+    },
+    {
       "name": "instructions",
       "source": "./plugins/instructions",
       "description": "/instructions:init sets up and reviews a project's CLAUDE.md and CLAUDE.local.md and your global ~/.claude/CLAUDE.md. A fork of Claude Code's new /init that checks each file against Claude Code's docs and prompt audit, and shows every draft before writing."
