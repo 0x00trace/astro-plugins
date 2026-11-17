@@ -1,6 +1,6 @@
 # github-tracking
 
-Keeps a repo's GitHub issues, milestones and Projects board true while Claude works, so you can see on GitHub where a project stands instead of asking. Two skills: `/github-tracking:init` sets up a repo's board, and `track` keeps it true as you work. Claude loads track whenever it starts, plans, files or finishes work in a repo with a GitHub remote, or you ask where a project stands. You can also run it as `/github-tracking:track`.
+Keeps a repo's GitHub issues, milestones and Projects board true while Claude works, so you can see on GitHub where a project stands instead of asking. Two skills: `/github-tracking:init` sets up a repo's board, and `track` says how the board works. Claude loads track whenever it opens, starts, files or finishes an issue or PR in a repo with a GitHub remote, or you ask where a project stands. You can also run it as `/github-tracking:track`.
 
 ```
 /plugin install github-tracking --marketplace astrosteveo/astro-plugins
@@ -12,22 +12,26 @@ Keeps a repo's GitHub issues, milestones and Projects board true while Claude wo
 /github-tracking:init
 ```
 
-Run it in a repo with a GitHub remote, or ask Claude to set up a board. It makes a Projects board and links it to the repo, gives it its views, makes the labels and milestones the work needs, checks the board's workflows, puts the open issues on the board and posts a first status update. On a repo that already has a board, it adds only what's missing, so running it on an older board gives the board its views.
+Run it in a repo with a GitHub remote, or ask Claude to set up a board. It makes a Projects board and links it to the repo, gives it its views, checks the board's workflows and puts the open issues on the board. On a repo that already has a board, it adds only what's missing, so running it on an older board gives the board its views. It makes no labels or milestones.
 
-## What Claude does
+## What the skills cover
 
-| When | What |
-| --- | --- |
-| A change starts | Finds or opens its issue, with a label for its kind and its milestone, and puts it on the board as In Progress |
-| A PR opens | Its body says `Closes #N`, and it goes on the board too |
-| A PR merges | Checks the board moved both to Done, and closes a milestone whose last issue closed |
-| Something turns up | Whatever doesn't go in the current change gets its own issue, on the board as Todo |
-| A larger step is planned | One parent issue in its milestone: what exists today, then open questions with recommendations. Once you decide them, it splits into sub-issues |
-| Where things stand changes | A short status update on the board: what's done, what's next, what's in the way |
-| You ask where a project is | Answers from the board, the milestones and git, and fixes what's out of step |
-| A repo has no board | Offers to set one up with `/github-tracking:init` |
+The track skill tells Claude how the board works and how to change it:
 
-The skills say what to keep on GitHub, not how to do the work: branches, commits, what goes in a change and how issues are labelled follow your CLAUDE.md and the repo's own rules. Those rules can also say what the repo's milestones stand for; the skills follow them over their own.
+- `board.py` moves an issue or PR to a status, adding it to the board first, because the API can't turn on a board's auto-add workflow.
+- A PR whose body says `Closes #N` closes the issue when it merges, and the board's workflows move both to Done.
+- A milestone stays open after its last issue closes, until something closes it.
+- `board.py show` says where the board stands and marks what's out of step: a closed item that isn't Done, an open one that is, workflows that are off and views the board lacks.
+- When a repo has no board, Claude offers to set one up with `/github-tracking:init`, and remembers if you say no.
+
+The skills don't say how to work. Which work gets an issue, how issues are labelled and put in milestones, when to post a status update, and how to branch and commit are yours to set in your own CLAUDE.md and the repo's rules. For example:
+
+```markdown
+# Tracking work
+In a repo on GitHub, track the work in its issues and the Projects board linked to it:
+- Every change I commit gets an issue. Move it to In Progress on the board when you start it.
+- A PR's body says `Closes #N` for each issue it finishes.
+```
 
 ## The script
 

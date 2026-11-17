@@ -54,7 +54,7 @@ class BothSkillsTest(unittest.TestCase):
                 re.findall(r"board\.py (?:--\S+ \S+ )*([a-z]+)", skill(name)[1])
             )
         self.assertEqual(named["track"], {"show", "move", "sub", "update"})
-        self.assertEqual(named["init"], {"show", "views", "move", "update"})
+        self.assertEqual(named["init"], {"show", "views", "move"})
         for command in named["track"] | named["init"]:
             with (
                 self.assertRaises(SystemExit) as done,
@@ -68,12 +68,24 @@ class BothSkillsTest(unittest.TestCase):
         approved = re.findall(
             r"Bash\((gh [a-z]+ [a-z]+) \*\)", field(skill("init")[0], "allowed-tools")
         )
-        self.assertEqual(
-            set(approved), {"gh repo view", "gh label list", "gh issue list"}
-        )
+        self.assertEqual(set(approved), {"gh repo view", "gh issue list"})
         body = skill("init")[1]
         for command in approved:
             self.assertRegex(body, rf"(?m)^{command} ")
+
+    def test_how_the_work_is_done_is_left_to_the_users_rules(self):
+        # The skills say how GitHub and board.py work. Which work gets an issue, labels,
+        # milestones, branches and commits are the user's to set in their CLAUDE.md.
+        for name in SKILLS:
+            with self.subTest(name):
+                body = skill(name)[1]
+                self.assertIn("the user's own rules and the repo's", body.lower())
+                for rule in [
+                    "Start each change",
+                    "File what you find",
+                    "Plan a larger step",
+                ]:
+                    self.assertNotIn(f"## {rule}", body)
 
 
 class TrackTest(unittest.TestCase):
@@ -110,6 +122,11 @@ class InitTest(unittest.TestCase):
     def test_a_second_run_adds_only_what_is_missing(self):
         self.assertIn("Skip this if `show` printed a board", self.body)
         self.assertIn("so a second run changes nothing", self.body)
+
+    def test_it_makes_no_labels_or_milestones(self):
+        self.assertIn("It makes no labels or milestones.", self.body)
+        self.assertNotIn("gh label create", self.body)
+        self.assertNotIn("/milestones -f", self.body)
 
     def test_it_asks_for_the_workflows_the_api_cannot_turn_on(self):
         for workflow in ["Item closed", "Pull request merged", "Auto-add sub-issues"]:
