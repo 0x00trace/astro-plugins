@@ -25,6 +25,8 @@ Use the plain word in place of these:
 - "land" or "go in": merge, release or publish.
 - "carry": include, hold or keep.
 - "unblock": let start, as in "AB-8 can start after PR #52 merges".
+- "hold up": wait on, or keep from starting.
+- "turn up": find or show.
 - "settle": answer or decide.
 - "pick up": start, continue or read.
 - "goes green": passes.
