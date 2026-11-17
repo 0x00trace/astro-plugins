@@ -2,7 +2,7 @@
 id: AP-29
 type: task
 title: Add eval cases that draw status and plan text
-status: in-progress
+status: done
 priority: high
 owner: claude
 created: 2026-11-16
@@ -31,3 +31,5 @@ Done when the three cases run in `claude plugin eval` with both arms, and the su
 - 2026-11-16 18:28 claude: 0.1.0 baseline, Claude Code 2.1.326, 3 runs per arm, Sonnet judge. Passing of 27 writing replies, with/without the plugin. Opus 5.5 ($10.28, 441s): vague references 6/3, metaphor verbs 17/13, cleft sentences 23/19, stand-in words 26/24, hedges 26/19, right answer 24/27. Fable 5.2 ($20.02, 402s): vague references 8/5, metaphor verbs 15/13, cleft sentences 24/17, stand-in words 22/20, hedges 27/14, right answer 26/27. stats.py with the plugin: Opus mean 189 words, 44 bold, 1 stand-in word; Fable 175 words, 45 bold, 5 stand-in words.
 - 2026-11-16 18:28 claude: commit-message's right-answer rubric asks for '10 items', and Opus with the plugin wrote 'exactly BULK_QTY items' from the diff; the judge passed one of two identical messages. Fix the rubric after AP-30's run, so AP-30 compares against the same rubric.
 - 2026-11-16 18:28 claude: done subtask: Run 0.1.0 on Fable 5.2 (whole suite) and Opus 5.5 (new cases), and log the counts
+- 2026-11-16 18:28 claude: Merged in PR #126.
+- 2026-11-16 18:28 claude: moved to done
