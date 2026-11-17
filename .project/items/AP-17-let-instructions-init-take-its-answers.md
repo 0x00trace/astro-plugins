@@ -2,7 +2,7 @@
 id: AP-17
 type: task
 title: Let /instructions:init take its answers as arguments, so an eval case can rerun the review
-status: todo
+status: cancelled
 priority: medium
 owner: claude
 created: 2026-11-15
@@ -16,3 +16,7 @@ A claude plugin eval run doesn't offer AskUserQuestion (AP-13), so /instructions
 
 ## Log
 - 2026-11-15 13:47 claude: created
+- 2026-11-16 18:51 claude: moved to in-progress
+- 2026-11-16 18:52 claude: moved to waiting: Build it? Arguments for /instructions:init plus two eval cases, about $15 per eval run, or cancel AP-17
+- 2026-11-16 18:54 claude: The user chose to cancel: driving a try-plugin session stays the way to check the review.
+- 2026-11-16 18:54 claude: moved to cancelled: Not worth it: the user cancelled after the cost and the plan were laid out (about $15 per eval run, and the project half may be dropped once /init shows its proposals)
