@@ -59,10 +59,10 @@ python3 -m unittest discover -s plugins/plain-english/tests
 | `next-step` | What should I do next to get 1.4 out? | starts with the macOS test failure in PR #33 |
 | `merge-today` | Can we merge #33 today? | says no, names `test_write_receipt` and its cause, and says how to fix it |
 
-Each of the nine has an `llm` grader for the right answer, plus nine graders for the style. They live in `evals/style-graders/`, and each case links to them:
+Each of the nine has an `llm` grader for the right answer, plus eight graders for the style. They live in `evals/style-graders/`, and each case links to them:
 
-- Six `regex` graders, one for each word list: hedges, filler, buzzwords, openers and closers, em dashes, and stand-in words such as "land", "carry" and "the work". A `regex` grader fails a run on one match in Claude's last message.
-- Three `llm` graders, one for each kind of stand-in: a vague reference ("it" or "the fix" with nothing named before it), a metaphor verb ("goes green" for passes), and a cleft sentence ("The next task is what carries the rest of the work").
+- Six `regex` graders, one for each word list: hedges, filler, buzzwords, openers and closers, em dashes, and stand-in words such as "land", "carry", "hold up" and "the work". A `regex` grader fails a run on one match in Claude's last message.
+- Two `llm` graders, one for each kind of stand-in the word lists can't catch: a metaphor verb ("goes green" for passes) and a cleft sentence ("The next task is what carries the rest of the work").
 
 ```
 mkdir -p "$HOME/.cache/claude-plugin-eval"
