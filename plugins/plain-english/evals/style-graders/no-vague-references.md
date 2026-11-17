@@ -1,8 +1,11 @@
 ---
 type: llm
 ---
-Check every sentence of the reply for a vague reference: a pronoun or general noun standing for a specific task, PR, test, file, change or step that isn't named in the same sentence or the one before.
+Check the reply for a vague reference: a phrase that makes the reader work out which task, PR, test, file or change is meant.
 
-FAIL if any sentence has one, such as "it", "this", "that", "the work", "the rest", "the remaining work", "the next task", "the change", "the fix" or "the blocker" with what it means not named in that sentence or the one before.
+FAIL if the reply has any of these:
+- A general phrase in place of specific items that the same sentence doesn't list, such as "the rest", "everything left", "everything else", "the remaining work", "the work" or "the next task".
+- "The change", "the fix", "the option" or "the issue" when the reply discusses more than one, so the reader can't tell which one is meant.
+- A pronoun such as "it", "this" or "that" whose meaning isn't clear from the sentences just before it.
 
-PASS if every pronoun and general noun has what it means named in the same sentence or the one before. "It" right after the PR it means is named passes. "The release" passes when only one release is discussed.
+PASS otherwise. A pronoun whose meaning is clear from the sentences just before it passes. So does "it" for the project the user asked about, and a phrase that the same or the next sentence names, as in "One thing differs on Windows: line endings."
