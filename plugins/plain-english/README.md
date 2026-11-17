@@ -1,6 +1,6 @@
 # plain-english
 
-Makes Claude write in plain English, the way good technical docs read: the answer first, short sentences, common words, and the actual file, command or number named. It leaves out hedging ("I think", "probably", "should work"), filler ("just", "really", "it's worth noting"), openers and closers ("Great question", "Hope this helps"), buzzwords and em dashes. The rules apply to everything Claude writes: replies, plans, code comments, commit messages, docs and subagent reports. They're in [`output-styles/plain-english.md`](output-styles/plain-english.md).
+Makes Claude write in plain English, the way good technical docs read: the answer first, short sentences, common words, and the actual file, command or number named. It leaves out hedging ("I think", "probably", "should work"), filler ("just", "really", "it's worth noting"), openers and closers ("Great question", "Hope this helps"), buzzwords and em dashes. In place of stand-ins such as "the work", "it lands" or "the rest", it names the item and uses the plain verb: "I'll merge PR #14 after `test_parser.py` passes." The rules apply to everything Claude writes: replies, plans, code comments, commit messages, docs and subagent reports. They're in [`output-styles/plain-english.md`](output-styles/plain-english.md).
 
 ```
 /plugin install plain-english --marketplace astrosteveo/astro-plugins
