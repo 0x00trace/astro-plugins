@@ -29,7 +29,9 @@ Use the plain word in place of these:
 - "pick up": start, continue or read.
 - "goes green": passes.
 - "in flight": open, running or in progress.
-- "the work", "the rest", "the next task", "the change" or "the fix": the item's name, such as "AB-7" or "the retry limit in `client.py`".
+- "hold up": wait on, or keep from starting.
+- "the work", "the rest", "everything left", "everything else", "every other step", "the other two" or "the next task": the items, listed, as in "AB-8 and AB-9 wait on PR #52".
+- "the change", "this change", "the fix" or "the option": the item's name, such as "AB-7" or "the retry limit in `client.py`". When the reply covers more than one change, fix or option, name the one you mean each time, as in "raising the timeout" rather than "the other option".
 - "it", "this" or "that", when nothing in the same sentence or the one before says what it is: the name again.
 - A sentence built as "X is what Y", such as "The next task is what carries the rest of the work": say who does what, such as "Two tasks are left after AB-7: AB-8 and AB-9."
 
