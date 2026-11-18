@@ -54,9 +54,9 @@ class InitSkillTest(unittest.TestCase):
 
     def test_it_names_the_words_the_script_reports(self):
         source = (PLUGIN / "scripts" / "scaffold.py").read_text()
-        for word in ["created", "kept", "added"]:
+        for word in ["created", "kept", "added", "changed"]:
             self.assertIn(f"{word} ", source)
-        self.assertIn("created, kept or added to", self.body)
+        self.assertIn("created, kept, added or changed", self.body)
         self.assertIn("scaffold.py: --docs-dir", self.body)
         self.assertIn('f"--docs-dir {docs_dir}', source)
 
