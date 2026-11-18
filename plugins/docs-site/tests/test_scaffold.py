@@ -73,21 +73,21 @@ class NewRepoTest(RepoTest):
         self.assertEqual(code, 0)
         self.assertEqual(
             self.read("mkdocs.yml"),
-            'site_name: "my-project"\n'
-            'repo_url: "https://github.com/someone/my-project"\n'
-            'dev_addr: "127.0.0.1:8100"\n' + THEME,
+            "site_name: my-project\n"
+            "repo_url: https://github.com/someone/my-project\n"
+            "dev_addr: 127.0.0.1:8100\n" + THEME,
         )
         self.assertEqual(
             self.read("docs/index.md"), "# my-project\n\nTools for my project.\n"
         )
-        self.assertEqual(self.read(".gitignore"), "site/\n")
+        self.assertEqual(self.read(".gitignore"), "site/\n.cache/\n")
         self.assertEqual(
             out.splitlines(),
             [
                 f"{self.root}:",
                 "  created mkdocs.yml, with dev_addr 127.0.0.1:8100",
                 "  created docs/index.md",
-                "  created .gitignore with site/",
+                "  created .gitignore with site/ and .cache/",
                 "  uvx zensical serve shows it at http://127.0.0.1:8100",
             ],
         )
@@ -112,7 +112,7 @@ class NewRepoTest(RepoTest):
                 "  kept mkdocs.yml (it exists)",
                 "  kept dev_addr 127.0.0.1:8100 in mkdocs.yml",
                 "  kept docs/index.md (it exists)",
-                "  kept .gitignore (it ignores site/)",
+                "  kept .gitignore (it ignores site/ and .cache/)",
                 "  uvx zensical serve shows it at http://127.0.0.1:8100",
             ],
         )
@@ -146,7 +146,7 @@ class NewRepoTest(RepoTest):
         folder.mkdir()
         run(folder)
         self.assertTrue((folder / "mkdocs.yml").is_file())
-        self.assertIn('site_name: "notes"', (folder / "mkdocs.yml").read_text())
+        self.assertIn("site_name: notes", (folder / "mkdocs.yml").read_text())
 
 
 class PortTest(RepoTest):
@@ -155,14 +155,14 @@ class PortTest(RepoTest):
         run(self.root)
         run(other)
         run(self.root)
-        self.assertIn('dev_addr: "127.0.0.1:8100"', self.read("mkdocs.yml"))
-        self.assertIn('dev_addr: "127.0.0.1:8101"', (other / "mkdocs.yml").read_text())
+        self.assertIn("dev_addr: 127.0.0.1:8100", self.read("mkdocs.yml"))
+        self.assertIn("dev_addr: 127.0.0.1:8101", (other / "mkdocs.yml").read_text())
         self.assertEqual(self.ports(), {str(self.root): 8100, str(other): 8101})
 
     def test_a_port_in_use_now_is_skipped(self):
         self.busy = {8100, 8101}
         run(self.root)
-        self.assertIn('dev_addr: "127.0.0.1:8102"', self.read("mkdocs.yml"))
+        self.assertIn("dev_addr: 127.0.0.1:8102", self.read("mkdocs.yml"))
 
     def test_a_repo_keeps_its_port_while_its_own_site_is_running(self):
         run(self.root)
@@ -174,7 +174,7 @@ class PortTest(RepoTest):
         (self.root / "mkdocs.yml").write_text("site_name: Mine")
         _, out, _ = run(self.root)
         self.assertEqual(
-            self.read("mkdocs.yml"), 'site_name: Mine\ndev_addr: "127.0.0.1:8100"\n'
+            self.read("mkdocs.yml"), "site_name: Mine\ndev_addr: 127.0.0.1:8100\n"
         )
         self.assertIn("  added dev_addr 127.0.0.1:8100 to mkdocs.yml", out.splitlines())
 
@@ -194,7 +194,7 @@ class PortTest(RepoTest):
         shutil.copy(other / "mkdocs.yml", self.root / "mkdocs.yml")
         code, out, _ = run(self.root)
         self.assertEqual(code, 0)
-        self.assertIn('dev_addr: "127.0.0.1:8101"', self.read("mkdocs.yml"))
+        self.assertIn("dev_addr: 127.0.0.1:8101", self.read("mkdocs.yml"))
         self.assertIn(
             "  changed dev_addr in mkdocs.yml from 127.0.0.1:8100 to 127.0.0.1:8101,"
             f" as 8100 is the port of {other}",
@@ -207,7 +207,7 @@ class PortTest(RepoTest):
         run(gone)
         shutil.rmtree(gone)
         run(self.root)
-        self.assertIn('dev_addr: "127.0.0.1:8100"', self.read("mkdocs.yml"))
+        self.assertIn("dev_addr: 127.0.0.1:8100", self.read("mkdocs.yml"))
         self.assertEqual(self.ports(), {str(self.root): 8100})
 
     def test_a_zensical_toml_without_dev_addr_is_left_alone_and_named(self):
@@ -268,13 +268,13 @@ class InUseTest(unittest.TestCase):
 class ExistingFilesTest(RepoTest):
     def test_an_existing_config_is_kept_and_its_docs_dir_used(self):
         (self.root / "mkdocs.yml").write_text(
-            'site_name: Mine\ndocs_dir: handbook  # pages\ndev_addr: "127.0.0.1:8100"\n'
+            "site_name: Mine\ndocs_dir: handbook  # pages\ndev_addr: 127.0.0.1:8100\n"
         )
         code, out, _ = run(self.root)
         self.assertEqual(code, 0)
         self.assertEqual(
             self.read("mkdocs.yml"),
-            'site_name: Mine\ndocs_dir: handbook  # pages\ndev_addr: "127.0.0.1:8100"\n',
+            "site_name: Mine\ndocs_dir: handbook  # pages\ndev_addr: 127.0.0.1:8100\n",
         )
         self.assertTrue((self.root / "handbook" / "index.md").is_file())
         self.assertFalse((self.root / "docs").exists())
@@ -296,15 +296,23 @@ class ExistingFilesTest(RepoTest):
     def test_it_adds_the_ignore_line_after_a_file_with_no_final_newline(self):
         (self.root / ".gitignore").write_text("__pycache__/\n.venv")
         _, out, _ = run(self.root)
-        self.assertEqual(self.read(".gitignore"), "__pycache__/\n.venv\nsite/\n")
-        self.assertIn("  added site/ to .gitignore", out.splitlines())
+        self.assertEqual(
+            self.read(".gitignore"), "__pycache__/\n.venv\nsite/\n.cache/\n"
+        )
+        self.assertIn("  added site/ and .cache/ to .gitignore", out.splitlines())
 
-    def test_any_form_of_the_site_line_counts(self):
+    def test_any_form_of_the_ignore_lines_counts(self):
         for line in ["site", "site/", "/site", "/site/"]:
             with self.subTest(line):
-                (self.root / ".gitignore").write_text(f"x\n  {line}\n")
+                (self.root / ".gitignore").write_text(f"x\n  {line}\n/.cache\n")
                 run(self.root)
-                self.assertEqual(self.read(".gitignore"), f"x\n  {line}\n")
+                self.assertEqual(self.read(".gitignore"), f"x\n  {line}\n/.cache\n")
+
+    def test_a_gitignore_with_site_gets_only_the_cache_line(self):
+        (self.root / ".gitignore").write_text("site/\n")
+        _, out, _ = run(self.root)
+        self.assertEqual(self.read(".gitignore"), "site/\n.cache/\n")
+        self.assertIn("  added .cache/ to .gitignore", out.splitlines())
 
 
 class DocsDirTest(RepoTest):
@@ -315,8 +323,8 @@ class DocsDirTest(RepoTest):
         self.assertEqual(code, 0)
         self.assertEqual(
             self.read("mkdocs.yml"),
-            'site_name: "my-project"\ndocs_dir: ".project/docs"\n'
-            'dev_addr: "127.0.0.1:8100"\n' + THEME,
+            "site_name: my-project\ndocs_dir: .project/docs\n"
+            "dev_addr: 127.0.0.1:8100\n" + THEME,
         )
         self.assertEqual(self.read(".project/docs/index.md"), "# my-project\n")
         self.assertEqual(self.read(".project/docs/cli.md"), "# CLI\n")
@@ -324,7 +332,7 @@ class DocsDirTest(RepoTest):
 
     def test_an_absolute_docs_dir_inside_the_repo_is_made_relative(self):
         run(self.root, "--docs-dir", str(self.root / "handbook"))
-        self.assertIn('docs_dir: "handbook"', self.read("mkdocs.yml"))
+        self.assertIn("docs_dir: handbook", self.read("mkdocs.yml"))
 
     def test_a_docs_dir_outside_the_repo_or_at_its_root_fails_and_writes_nothing(self):
         for docs_dir in ["..", "../elsewhere", ".", "/tmp"]:
@@ -370,3 +378,40 @@ class WebUrlTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ScalarTest(unittest.TestCase):
+    def test_text_yaml_reads_as_text_goes_without_quotes(self):
+        for text in [
+            "astrocode",
+            "my-project",
+            "My project",
+            "https://github.com/o/r",
+            "127.0.0.1:8101",
+            ".project/docs",
+            "v1.2",
+        ]:
+            with self.subTest(text):
+                self.assertEqual(scaffold.scalar(text), text)
+
+    def test_text_yaml_would_read_as_something_else_is_quoted(self):
+        for text in [
+            "12",
+            "1.5",
+            "0x1F",
+            "1:20",
+            "yes",
+            "No",
+            "null",
+            "~",
+            ".inf",
+            "2026-11-17",
+            "a: b",
+            "a:",
+            "#x",
+            "-x",
+            "it's",
+            "",
+        ]:
+            with self.subTest(text):
+                self.assertEqual(scaffold.scalar(text), json.dumps(text))

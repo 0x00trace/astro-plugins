@@ -1,6 +1,6 @@
 ---
 name: init
-description: Set up a repo's docs site - a mkdocs.yml with the site's own port, a docs home page and site/ in .gitignore, so `uvx zensical serve` shows the Markdown in docs/ as a site with a sidebar, sections and search. One script writes them and keeps any that exist, so a second run changes nothing. Use when the user asks to set up, start, scaffold or initialize docs, a docs site or Zensical for a repo, or a repo needs a docs site and has no mkdocs.yml.
+description: Set up a repo's docs site - a mkdocs.yml with the site's own port, a docs home page and site/ and .cache/ in .gitignore, so `uvx zensical serve` shows the Markdown in docs/ as a site with a sidebar, sections and search. One script writes them and keeps any that exist, so a second run changes nothing. Use when the user asks to set up, start, scaffold or initialize docs, a docs site or Zensical for a repo, or a repo needs a docs site and has no mkdocs.yml.
 allowed-tools: Bash(python3 ${CLAUDE_PLUGIN_ROOT}/scripts/scaffold.py *), Bash(uvx zensical build *)
 ---
 
@@ -13,7 +13,9 @@ Zensical turns a repo's Markdown docs into a site with a sidebar, a section per 
 - `mkdocs.yml`: the site's name (the repo's folder name), its URL from the `origin` remote, its port, and the theme. It has no `nav` list, so the sidebar shows every page in the docs folder, titled by its `#` heading, and a new page needs no change to the config.
 - The port, as `dev_addr`: each repo's site gets its own, from 8100 up, so any number of sites can be served at once. The script records each repo's port in `~/.local/share/docs-site/ports.json` and never gives one to two repos. An existing config keeps its own `dev_addr` unless another repo has that port, and gets the line if it has none.
 - `docs/index.md`: the home page, with the site's name as its heading and the description under it.
-- `site/` in `.gitignore`: Zensical builds the site into `site/`.
+- `site/` and `.cache/` in `.gitignore`: Zensical builds the site into `site/` and keeps a cache in `.cache/`. A tool that doesn't read `.gitignore`, such as ESLint's flat config, needs both in its own ignores.
+
+Values in `mkdocs.yml` have quotes only where YAML needs them, so a formatter that prefers either kind of quote leaves the file alone.
 
 It makes no other folders or pages, and commits nothing.
 

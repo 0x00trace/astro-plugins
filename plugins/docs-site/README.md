@@ -18,7 +18,7 @@ Run it in any repo, or ask Claude to set up a docs site. A script writes three t
 | --- | --- |
 | `mkdocs.yml` | The site's name (the repo's folder), its URL from the `origin` remote, its own port as `dev_addr`, and the theme. It has no `nav` list, so every page in the docs folder shows in the sidebar, titled by its `#` heading, with no change to the config. |
 | `docs/index.md` | The home page: the site's name as its heading, and a line from the README or PROJECT.md that says what the project is. |
-| `.gitignore` | A `site/` line, for the built site. |
+| `.gitignore` | `site/` and `.cache/` lines, for the built site and Zensical's cache. A tool that doesn't read `.gitignore`, such as ESLint's flat config, needs both in its own ignores. |
 
 Then Claude builds the site once with `uvx zensical build` to check it, and tells you what it created. It makes no other folders or pages, adds no GitHub Pages workflow, and commits nothing.
 
