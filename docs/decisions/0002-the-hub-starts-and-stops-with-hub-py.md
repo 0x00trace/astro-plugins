@@ -1,6 +1,6 @@
 # The hub starts and stops with hub.py
 
-Status: proposed 2026-11-18 · #154
+Status: accepted 2026-11-18 · #154
 
 ## Context
 
