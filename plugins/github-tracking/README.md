@@ -1,6 +1,6 @@
 # github-tracking
 
-Keeps a repo's GitHub issues, milestones and Projects board true while Claude works, so you can see on GitHub where a project stands instead of asking. Two skills: `/github-tracking:init` sets up a repo's board, and `track` says how the board works. Claude loads track whenever it opens, starts, files or finishes an issue or PR in a repo with a GitHub remote, or you ask where a project stands. You can also run it as `/github-tracking:track`.
+Keeps a repo's GitHub issues, milestones and Projects board true while Claude works, so you can see on GitHub where a project stands instead of asking. Three skills: `/github-tracking:init` sets up a repo's board, `/github-tracking:migrate` moves a repo's corkboard items onto it, and `track` says how the board works. Claude loads track whenever it opens, starts, files or finishes an issue or PR in a repo with a GitHub remote, or you ask where a project stands. You can also run it as `/github-tracking:track`.
 
 ```
 /plugin install github-tracking --marketplace astrosteveo/astro-plugins
@@ -13,6 +13,28 @@ Keeps a repo's GitHub issues, milestones and Projects board true while Claude wo
 ```
 
 Run it in a repo with a GitHub remote, or ask Claude to set up a board. It makes a Projects board and links it to the repo, gives it its views, checks the board's workflows and puts the open issues on the board. On a repo that already has a board, it adds only what's missing, so running it on an older board gives the board its views. It makes no labels or milestones.
+
+## Migrate a repo
+
+```
+/github-tracking:migrate
+```
+
+Run it in a repo that kept its work with corkboard in `.project/`, or one whose board an older github-tracking set up. `scripts/migrate.py scan` reads the repo and its board and says what it would change, Claude shows you that plan and any edits it would make by hand, such as a CLAUDE.md line that names corkboard, and nothing changes until you approve. Then `migrate.py run`:
+
+| From | To |
+| --- | --- |
+| A project with the repo's name that isn't linked to it | Linked, with the views it lacks. With none, a new board. |
+| A corkboard release with open items | A milestone |
+| An open epic, task or bug | An issue on the board, with its description, subtasks, log and labels. In progress and waiting items go to In Progress, the rest to Todo. |
+| An epic's open tasks and bugs | Its sub-issues |
+| `blocked_by` an open item | GitHub's blocked-by link |
+| An item ID in the repo's Markdown, such as `EX-12` | A link to its issue, or for a done item to the merged PR that names it |
+| `.project/docs/` | `docs/`, moved with `git mv`, with the links to and from it fixed |
+| `.project/items`, `releases`, `config.yml` and `.project/` ignore lines | Removed. Git history keeps them. |
+| Closed issues not at Done, and milestones whose issues are all closed | Moved to Done, and closed |
+
+Done and cancelled items get no issues. Each issue it opens has a hidden `<!-- corkboard: EX-12 -->` marker, so running it again opens nothing twice and finishes a run that stopped partway. It commits nothing. In a repo whose `.project/` is already gone, `migrate.py scan --prefix AP` links its old IDs to the PRs whose titles name them.
 
 ## What the skills cover
 

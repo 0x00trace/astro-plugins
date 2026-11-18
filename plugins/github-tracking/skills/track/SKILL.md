@@ -46,3 +46,7 @@ Which work gets an issue, how issues are labelled, titled and put in milestones,
 ## A repo with no board
 
 When `board.py` says no board is linked to the repo, offer to set one up. If the user says yes, set it up with the init skill (`/github-tracking:init`). If they say no, save that in the project's memory, and don't offer again in that repo.
+
+## A repo with corkboard's .project/ folder
+
+corkboard kept a repo's work as Markdown items in `.project/`. When a repo you're tracking on GitHub still has `.project/items`, offer to move them to issues with the migrate skill (`/github-tracking:migrate`), which shows what it would change before it changes anything.

@@ -136,3 +136,44 @@ class InitTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class MigrateTest(unittest.TestCase):
+    def setUp(self):
+        self.front, self.body = skill("migrate")
+        self.allowed = field(self.front, "allowed-tools")
+
+    def test_scan_and_the_git_reads_are_pre_approved_and_run_is_not(self):
+        # run changes GitHub and the repo, so the user approves it at the prompt, after the plan.
+        script = "${CLAUDE_PLUGIN_ROOT}/scripts/migrate.py"
+        self.assertIn(f"Bash(python3 {script} scan)", self.allowed)
+        self.assertIn(f"Bash(python3 {script} scan *)", self.allowed)
+        self.assertNotIn(f"Bash(python3 {script} *)", self.allowed)
+        self.assertNotIn(f"{script} run", self.allowed)
+        for command in re.findall(r"`(git (?:log|show)) ", self.body):
+            self.assertIn(f"Bash({command} *)", self.allowed)
+        self.assertTrue((PLUGIN / "scripts" / "migrate.py").is_file())
+
+    def test_every_command_and_option_it_names_is_one_migrate_py_has(self):
+        import migrate
+
+        commands = set(re.findall(r"migrate\.py (scan|run)\b", self.body))
+        self.assertEqual(commands, {"scan", "run"})
+        options = set(re.findall(r"`(--[a-z]+)", self.body))
+        self.assertEqual(options, {"--project", "--prefix"})
+        out = io.StringIO()
+        with self.assertRaises(SystemExit), contextlib.redirect_stdout(out):
+            migrate.main(["--help"])
+        for option in options:
+            self.assertIn(option, out.getvalue())
+
+    def test_the_plan_ends_the_turn_before_run(self):
+        show = self.body[
+            self.body.index("## 2. Show the plan") : self.body.index("## 3. Migrate")
+        ]
+        self.assertIn("end your turn there", show)
+        self.assertIn("Don't ask with a question dialog", show)
+        self.assertIn("Once the user approves, run `run`", self.body)
+
+    def test_track_points_a_corkboard_repo_to_migrate(self):
+        self.assertIn("(`/github-tracking:migrate`)", skill("track")[1])
