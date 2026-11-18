@@ -24,7 +24,7 @@ The author: a solo developer on Linux who uses Claude Code for hobby projects. T
 
 - Settings or features for needs other than the author's, such as team or org setups. Why: these are personal plugins for solo hobby projects.
 - Doing what Claude Code already does itself. A plugin is dropped once Claude Code ships the same feature. Why: a plugin like that is upkeep with no gain.
-- Telling Claude how to work, such as git, planning or docs habits. A plugin says how its own tools work and what they need. Why: how the author works belongs in their CLAUDE.md, so taking a plugin's function doesn't mean taking a workflow with it.
+- Carrying the author's own workflow habits, such as how to use git, which work gets an issue, or where docs go. Why: those live in the author's global CLAUDE.md, so installing a plugin doesn't bring the author's habits with it. A plugin can still say how to use its own tool well.
 
 ## Success looks like
 
@@ -73,6 +73,7 @@ The author: a solo developer on Linux who uses Claude Code for hobby projects. T
 - 2026-11-17: Restored github-tracking and dropped corkboard from the marketplace, replacing the 2026-11-12 line that lists corkboard from its own repo and the 2026-11-16 line that drops github-tracking. github-tracking's skills say only how the board works, and which work gets an issue moved to the author's global CLAUDE.md. The project's docs moved from `.project/docs/` to the repo's wiki. Why: the author's remotes are on GitHub, so they track the work with GitHub's own issues, Projects board and wiki, rather than keep up a custom web app that could break.
 - 2026-11-17: Project docs live in `docs/`, shown as a site with `uvx zensical serve`, replacing the line above that moved them to the wiki. GitHub Pages isn't used, so every repo, public or private, reads its docs the same way. Why: a wiki needs its first page saved in the browser in each repo, and its Pages box lists every page with all its headings, so it doesn't scale. A `docs/` folder needs no setup and changes in the same PR as the code, and Zensical, the successor to Material for MkDocs, shows it with a sidebar, sections and search.
 - 2026-11-17: Added docs-site, whose /docs-site:init writes a repo's `mkdocs.yml`, docs home page and `site/` ignore line with one script, rather than `zensical new`. Why: setting up the docs site by hand came up in every new repo, and `zensical new` writes a fixed `nav` list that each new page has to be added to, a demo page, a GitHub Pages workflow and a placeholder name and URL.
+- 2026-11-17: Narrowed the workflow non-goal, replacing the 2026-11-16 line that plugins don't tell Claude how to work: a plugin leaves out the author's own habits, such as git, issue tracking and where docs go, and can still say how to use its own tool well. Why: every skill is instructions to Claude, so the broad wording read as ruling out any guidance a plugin gives, and the author suspected it was hurting some sessions.
 
 ## Open questions
 
