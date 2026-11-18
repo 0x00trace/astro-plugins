@@ -32,7 +32,7 @@ A repo that keeps its docs somewhere else, such as `.project/docs`, keeps them t
 uvx zensical serve -o
 ```
 
-It builds the site, opens it at its own port, such as http://127.0.0.1:8100, and rebuilds when a page changes. It needs [uv](https://docs.astral.sh/uv/).
+It builds the site, opens it at its own port, such as http://127.0.0.1:8100, and rebuilds when a page changes. It needs [uv](https://docs.astral.sh/uv/). When the hub is running, the site is already served at `http://NAME.localhost:8099`, so you don't need to start it.
 
 ## The hub
 
@@ -45,22 +45,39 @@ The hub serves every project's docs at once, and lists them on a dashboard:
 - `http://localhost:8099` is the dashboard: each project's address, a line about it and a link to its repository.
 - `http://NAME.localhost:8099` is a project's site, where NAME is its repo's folder name. `.localhost` names need no setup: browsers send them to your own machine.
 
-It's a Docker Compose project, `docs-site`, that `scripts/hub.py` writes to `~/.local/share/docs-site/hub/` from the repos `/docs-site:init` has set up:
+It needs Docker with its compose plugin. `/docs-site:hub` installs it, and from then on `/docs-site:init` adds each new repo to it.
+
+### Use the hub
+
+`hub.py` installs the hub and checks it, and Docker Compose stops and starts it. `hub.py` is in the plugin's `scripts/` folder: `~/.claude/plugins/cache/astro-plugins/docs-site/VERSION/scripts/hub.py` in an install, where VERSION is the plugin's version, or `plugins/docs-site/scripts/hub.py` in a clone of this repo. Run it with `python3`. The `docker compose -p docs-site` commands work from any folder.
+
+```
+hub.py install                                # write the hub's files and start every site; safe to run again
+hub.py install --port 80                      # another port; later runs keep it
+hub.py status                                 # whether the dashboard and each site answer; exits 1 if one doesn't
+docker compose -p docs-site ps                # each container and how long it has been up
+docker compose -p docs-site stop              # stop the dashboard and every site
+docker compose -p docs-site start             # start them again
+docker compose -p docs-site stop site-NAME    # stop one site; start it the same way
+docker compose -p docs-site logs site-NAME    # a site's log, when it isn't answering
+hub.py remove                                 # stop the hub, and remove its containers and folder
+```
+
+- `start` and `install` both start every site. Use `start` after a `stop`. Use `install` after anything removes the containers, such as `docker compose -p docs-site down`, and after you delete a repo's folder: it writes the hub's files from the repos on record, then starts what isn't running.
+- The containers start with Docker, so the hub comes back after a reboot when Docker's service is enabled (`sudo systemctl enable docker`). A site you stopped stays stopped through a reboot until you `start` it.
+- `status` reports a site you stopped as `container exited, not answering (502)`, and exits 1.
+
+### How it works
+
+It's a Docker Compose project, `docs-site`, that `hub.py` writes to `~/.local/share/docs-site/hub/` from the repos `/docs-site:init` has set up:
 
 - Each project gets a container running `zensical serve` from Zensical's own image, `zensical/zensical`, in the repo. A page you change is rebuilt and reloads in the browser.
 - One Caddy container routes the names to them. Only it has a host port, so `uvx zensical serve` in a repo still works while the hub runs.
-- Containers restart if they exit, and start with Docker at boot. A site whose repo is on a branch with no `mkdocs.yml` comes back by itself within about a minute of the file returning, and until then its address says the site isn't running and how to read its log.
+- Containers restart if they exit, unless you stopped them. A site whose repo is on a branch with no `mkdocs.yml` comes back by itself within about a minute of the file returning, and until then its address says the site isn't running and how to read its log.
 
-Once the hub is installed, `/docs-site:init` adds each new repo to it. A repo whose folder you delete stops being served, and the next `hub.py install` drops it. The hub's mounts never create a missing folder, which Docker would otherwise make as root where the repo was.
+A repo whose folder you delete stops being served, and the next `hub.py install` drops it. The hub's mounts never create a missing folder, which Docker would otherwise make as root where the repo was.
 
-```
-hub.py install              # write the hub's files and start it; safe to run again
-hub.py install --port 80    # another port; later runs keep it
-hub.py status               # whether the dashboard and each site answer; exits 1 if one doesn't
-hub.py remove               # stop the hub, and remove its containers and folder
-```
-
-It needs Docker with its compose plugin. The sites run the Zensical in the image, which changes only when you download it again: `docker compose -f ~/.local/share/docs-site/hub/compose.yml pull`, then `hub.py install`. The proxy sends `Host` and `Origin` as `localhost` to Zensical's server, which answers 400 otherwise, so a Zensical update that changes that check could stop pages reloading on a change.
+The sites run the Zensical in the image, which changes only when you download it again: `docker compose -f ~/.local/share/docs-site/hub/compose.yml pull`, then `hub.py install`. The proxy sends `Host` and `Origin` as `localhost` to Zensical's server, which answers 400 otherwise, so a Zensical update that changes that check could stop pages reloading on a change.
 
 ## Ports
 
