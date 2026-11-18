@@ -50,7 +50,7 @@
     {
       "name": "docs-site",
       "source": "./plugins/docs-site",
-      "description": "/docs-site:init sets up a repo's docs site in one script run: a mkdocs.yml with no nav list, a docs home page and site/ in .gitignore, so `uvx zensical serve` shows the Markdown in docs/ with a sidebar, sections and search. Each repo's site gets its own port, so any number can run at once."
+      "description": "/docs-site:init sets up a repo's docs site in one script run: a mkdocs.yml with no nav list, a docs home page and site/ in .gitignore, so `uvx zensical serve` shows the Markdown in docs/ with a sidebar, sections and search. /docs-site:hub serves every repo's site at once in Docker, each at http://NAME.localhost:8099, with a dashboard that lists them."
     },
     {
       "name": "instructions",
