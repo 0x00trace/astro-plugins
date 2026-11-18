@@ -71,7 +71,11 @@ class FakeGitHub:
         return {
             "views": set(self.views),
             "workflows_off": list(self.workflows_off),
-            "items": list(self.closed_items),
+            "items": [
+                {"number": n, "state": "OPEN", "status": st}
+                for n, st in self.board_items.items()
+            ]
+            + list(self.closed_items),
             "latest_update": self.latest_update,
         }
 
@@ -295,6 +299,10 @@ class ScanTest(CorkboardRepo):
         )
         self.assertIn("remove the .project/ lines from .prettierignore", out)
         self.assertIn("CLAUDE.md:3 names corkboard: Track work with corkboard.", out)
+        self.assertIn(
+            "no open item or merged PR to link these IDs to, so they stay as text: EX-9",
+            out,
+        )
 
 
 class RunTest(CorkboardRepo):
@@ -433,6 +441,25 @@ class RerunTest(CorkboardRepo):
         self.assertFalse((self.root / ".project").exists())
 
 
+class OffBoardTest(CorkboardRepo):
+    def test_a_rerun_puts_an_issue_opened_before_on_the_board(self):
+        self.run_migrate("run")
+        accounts = next(i for i in self.gh.issue_list if i["title"] == "Do EX-1")
+        del self.gh.board_items[
+            accounts["number"]
+        ]  # as if run stopped before putting it there
+        self.git("reset", "-q", "--hard")
+        self.gh.calls.clear()
+        _, scan, _ = self.run_migrate("scan")
+        self.assertIn(
+            f"put 1 issues opened before on the board, if they aren't on it: #{accounts['number']}",
+            scan,
+        )
+        self.run_migrate("run")
+        self.assertEqual(self.gh.board_items[accounts["number"]], "In Progress")
+        self.assertEqual([c[0] for c in self.gh.calls].count("add_to_board"), 1)
+
+
 class BoardTest(RepoTest):
     def setUp(self):
         super().setUp()
@@ -514,7 +541,10 @@ class PrefixTest(RepoTest):
         self.write({"docs/notes/n.md": "# N\n\nAP-2, AP-28 and AP-30.\n"})
         _, scan, _ = self.run_migrate("scan", "--prefix", "AP")
         self.assertIn("link 2 item IDs in 1 files", scan)
-        self.assertIn("no merged PR's title names AP-30, so they stay as text", scan)
+        self.assertIn(
+            "no open item or merged PR to link these IDs to, so they stay as text: AP-30",
+            scan,
+        )
         self.run_migrate("run", "--prefix", "AP")
         self.assertEqual(
             self.read("docs/notes/n.md"),

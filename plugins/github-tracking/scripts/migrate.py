@@ -470,8 +470,13 @@ def relink(
     return LINK.sub(fix, text)
 
 
-def link_ids(text: str, prefix: str, links: dict) -> tuple[str, int]:
-    """Turn each bare item ID outside code, links and URLs into a link to its issue or PR."""
+def link_ids(
+    text: str, prefix: str, links: dict, missing: set | None = None
+) -> tuple[str, int]:
+    """Turn each bare item ID outside code, links and URLs into a link to its issue or PR.
+
+    An ID with no link is left as it is, and added to missing.
+    """
     if not prefix:
         return text, 0
     pattern = re.compile(
@@ -484,6 +489,8 @@ def link_ids(text: str, prefix: str, links: dict) -> tuple[str, int]:
         if m.group(3) and m.group(3) in links:
             count += 1
             return f"[{m.group(3)}]({links[m.group(3)]})"
+        if m.group(3) and missing is not None:
+            missing.add(m.group(3))
         return m.group(0)
 
     out = []
@@ -538,6 +545,7 @@ class Plan:
     links: dict = field(default_factory=dict)  # item ID -> issue or PR URL
     planned: dict = field(default_factory=dict)  # links, with the issues run will open
     issues: dict = field(default_factory=dict)  # item ID -> issue
+    on_board: set | None = None  # issue numbers on the board, when it's known
 
     def do(self, description: str, function) -> None:
         self.actions.append((description, function))
@@ -569,6 +577,7 @@ def plan_board(p: Plan) -> None:
     p.board = gh.board()
     if p.board:
         state = gh.board_state(p.board)
+        p.on_board = {i["number"] for i in state["items"]}
         p.found.append(
             f"board {p.board['number']} ({p.board['title']}) is linked to {gh.repo}"
         )
@@ -765,6 +774,25 @@ def plan_issues(p: Plan, issues: list[dict]) -> None:
         for b in i.blocked_by
         if b in cork.items and cork.items[b].open
     ]
+    off_board = [
+        i
+        for i in open_items
+        if i.id in marked and marked[i.id]["number"] not in (p.on_board or set())
+    ]
+    if off_board:
+
+        def board_them():
+            # Checked again now, as a board linked by this run may hold some already.
+            have = {i["number"] for i in gh.board_state(p.board)["items"]}
+            for item in off_board:
+                if marked[item.id]["number"] not in have:
+                    gh.add_to_board(p.board, marked[item.id]["id"], STATUS[item.status])
+
+        p.do(
+            f"put {len(off_board)} issues opened before on the board, if they aren't on it: "
+            + ", ".join(f"#{marked[i.id]['number']}" for i in off_board),
+            board_them,
+        )
     new_subs = [i for i in subs if i.id not in marked or marked[i.id]["parent"] is None]
     new_blocks = [
         (i, b)
@@ -798,7 +826,7 @@ def plan_issues(p: Plan, issues: list[dict]) -> None:
         p.do("link the item IDs in the new issues to their issues and PRs", bodies)
 
 
-def file_edits(p: Plan, links: dict) -> dict:
+def file_edits(p: Plan, links: dict, missing: set | None = None) -> dict:
     """Each changed text file's new text and how many IDs it links, by its path after the move."""
     edits = {}
     for path in tracked(p.root, ".md", ".markdown"):
@@ -809,7 +837,7 @@ def file_edits(p: Plan, links: dict) -> dict:
         old = (p.root / path).read_text()
         new_path = moved(path, p.docs_move)
         text = relink(old, path, new_path, p.url, links, p.docs_move)
-        text, count = link_ids(text, p.prefix, links)
+        text, count = link_ids(text, p.prefix, links, missing)
         if text != old or new_path != path:
             edits[new_path] = (text, count)
     if p.docs_move:
@@ -825,8 +853,18 @@ def file_edits(p: Plan, links: dict) -> dict:
 
 def plan_files(p: Plan) -> None:
     root, cork = p.root, p.cork
-    preview = file_edits(p, p.planned or p.links)
+    missing = set()
+    preview = file_edits(p, p.planned or p.links, missing)
     linked = {str(k): n for k, (_, n) in preview.items() if n}
+    if missing:
+        named = []
+        for item_id in sorted(missing, key=lambda x: int(x.split("-")[1])):
+            item = cork.items.get(item_id) if cork else None
+            named.append(f"{item_id} ({item.status})" if item else item_id)
+        p.notes.append(
+            "no open item or merged PR to link these IDs to, so they stay as text: "
+            + ", ".join(named)
+        )
     said = []
     if p.docs_move:
         said.append(
@@ -932,11 +970,6 @@ def make_plan(root: Path, gh: GitHub, prefix: str | None = None) -> Plan:
                 re.findall(rf"\b{re.escape(p.prefix)}-\d+\b", (root / path).read_text())
             )
         pr_links(p, ids)
-        missing = sorted(ids - set(p.links), key=lambda x: int(x.split("-")[1]))
-        if missing:
-            p.notes.append(
-                f"no merged PR's title names {', '.join(missing)}, so they stay as text"
-            )
     if p.cork or p.prefix:
         plan_files(p)
     plan_ignores(p)

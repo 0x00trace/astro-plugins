@@ -14,6 +14,7 @@ import json
 import re
 import subprocess
 import sys
+import time
 from collections import defaultdict
 
 UPDATE_STATUSES = ("on-track", "at-risk", "off-track", "complete", "inactive")
@@ -63,16 +64,28 @@ class Fail(Exception):
     """A problem the caller can fix; main prints it without a traceback."""
 
 
+# Errors after which GitHub made no change, so the same call can be made again.
+TRANSIENT = re.compile(
+    r"temporary conflict|try again|secondary rate limit|HTTP 50[23]", re.IGNORECASE
+)
+WAITS = (1, 3, 9)
+
+
 def gh(*args: str, input: str | None = None) -> str:
-    try:
-        done = subprocess.run(
-            ["gh", *args], input=input, capture_output=True, text=True, check=False
-        )
-    except FileNotFoundError:
-        raise Fail("the gh CLI isn't on the PATH")
-    if done.returncode != 0:
-        raise Fail(done.stderr.strip() or f"gh {args[0]} failed")
-    return done.stdout
+    for wait in (*WAITS, None):
+        try:
+            done = subprocess.run(
+                ["gh", *args], input=input, capture_output=True, text=True, check=False
+            )
+        except FileNotFoundError:
+            raise Fail("the gh CLI isn't on the PATH")
+        if done.returncode == 0:
+            return done.stdout
+        problem = done.stderr.strip() or f"gh {args[0]} failed"
+        if wait is None or not TRANSIENT.search(problem):
+            raise Fail(problem)
+        time.sleep(wait)
+    raise AssertionError("unreachable")
 
 
 def graphql(query: str, **variables: str | int) -> dict:
