@@ -19,6 +19,8 @@ Values in `mkdocs.yml` have quotes only where YAML needs them, so a formatter th
 
 It makes no other folders or pages, and commits nothing.
 
+When the docs hub is installed (`/docs-site:hub`), the script also adds the repo to it, which starts one container for the repo's site, and prints the site's address there, such as `http://NAME.localhost:8099`. If the hub can't be updated, the script says why on a line starting `the hub wasn't updated` and sets the site up all the same.
+
 ## 1. Run the script
 
 Look for a line that says what the project is: the first sentence of the README, or the line under PROJECT.md's heading. If there's one, pass it with `--description`. If the repo keeps its docs in a folder other than `docs/`, such as `.project/docs`, pass that folder with `--docs-dir`. Pass `--name` only if the user gave the site a name.
@@ -27,7 +29,7 @@ Look for a line that says what the project is: the first sentence of the README,
 python3 ${CLAUDE_PLUGIN_ROOT}/scripts/scaffold.py --description "A line that says what the project is."
 ```
 
-Its first line is the repo root, each line after it says whether a file or line was created, kept, added or changed, and its last line gives the site's address. If it exits with `scaffold.py: --docs-dir …`, the folder is outside the repo or is the repo root: ask the user for a folder inside it. Any other `scaffold.py:` message names the file or port at fault, such as a `dev_addr` with no port: show it to the user. On any error the script writes nothing.
+Its first line is the repo root, each line after it says whether a file or line was created, kept, added or changed, and its last lines give the site's address. If it exits with `scaffold.py: --docs-dir …`, the folder is outside the repo or is the repo root: ask the user for a folder inside it. Any other `scaffold.py:` message names the file or port at fault, such as a `dev_addr` with no port: show it to the user. On any error the script writes nothing.
 
 ## 2. Check that it builds
 
@@ -41,4 +43,4 @@ It ends with `No issues found` and `Build finished`. If `uvx` isn't found, the s
 
 ## 3. Report
 
-Say which files the script created and which it kept, and that `uvx zensical serve -o` in the repo opens the site at the address it printed.
+Say which files the script created and which it kept, and that `uvx zensical serve -o` in the repo opens the site at the address it printed. If it printed a hub address, say the site is already running there.

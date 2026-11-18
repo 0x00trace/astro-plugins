@@ -233,6 +233,34 @@ def inside(root: Path, docs_dir: str) -> str:
     return resolved.relative_to(root.resolve()).as_posix()
 
 
+def run_hub(root: Path) -> tuple[int, str, str]:
+    """Have hub.py bring the hub up to date, and say where root's site is."""
+    done = subprocess.run(
+        [
+            sys.executable,
+            str(Path(__file__).with_name("hub.py")),
+            "update",
+            "--repo",
+            str(root),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    return done.returncode, done.stdout, done.stderr
+
+
+def hub_lines(root: Path) -> list[str]:
+    """What the hub says about root's site, when a hub is installed. Never fails the run."""
+    if not (ports_file().parent / "hub" / "compose.yml").is_file():
+        return []
+    code, out, err = run_hub(root)
+    if code != 0:
+        problem = (err.strip().splitlines() or ["hub.py failed"])[-1]
+        return [f"the hub wasn't updated: {problem.removeprefix('hub.py: ')}"]
+    return out.strip().splitlines()
+
+
 def scaffold(
     cwd: Path, name: str | None, description: str | None, docs_dir: str | None
 ) -> list[str]:
@@ -287,6 +315,7 @@ def scaffold(
             else f"created .gitignore with {listed}"
         )
     report.append(f"uvx zensical serve shows it at http://{HOST}:{port}")
+    report += hub_lines(root)
     return [f"{root}:"] + [f"  {line}" for line in report]
 
 

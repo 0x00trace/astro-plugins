@@ -69,3 +69,59 @@ class InitSkillTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def hub_skill():
+    _, front, body = (
+        (PLUGIN / "skills" / "hub" / "SKILL.md").read_text().split("---\n", 2)
+    )
+    return front, body
+
+
+class HubSkillTest(unittest.TestCase):
+    def setUp(self):
+        import hub
+
+        self.hub = hub
+        self.front, self.body = hub_skill()
+        self.script = "${CLAUDE_PLUGIN_ROOT}/scripts/hub.py"
+
+    def test_only_status_is_pre_approved(self):
+        # install and remove start and stop containers, so the user sees each one asked for.
+        self.assertEqual(allowed(self.front), [f"python3 {self.script} status"])
+
+    def test_every_command_it_names_is_one_hub_py_has(self):
+        named = set(re.findall(rf"{re.escape(self.script)} ([a-z]+)", self.body))
+        self.assertEqual(named, {"install", "status", "remove"})
+        for command in named:
+            out = io.StringIO()
+            with self.assertRaises(SystemExit) as done, contextlib.redirect_stdout(out):
+                self.hub.main([command, "--help"])
+            self.assertEqual(done.exception.code, 0, command)
+        self.assertTrue((PLUGIN / "scripts" / "hub.py").is_file())
+
+    def test_it_names_the_port_project_images_and_files_hub_py_uses(self):
+        self.assertIn(f"http://localhost:{self.hub.PORT}", self.front + self.body)
+        self.assertIn(f"`{self.hub.PROJECT}`", self.body)
+        self.assertIn(f"docker compose -p {self.hub.PROJECT} logs site-NAME", self.body)
+        for image in (self.hub.ZENSICAL.split(":")[0], self.hub.CADDY):
+            self.assertIn(f"`{image}`", self.body)
+        for name in self.hub.FILES:
+            self.assertIn(name, self.body)
+
+    def test_it_says_the_words_hub_py_prints(self):
+        source = (PLUGIN / "scripts" / "hub.py").read_text()
+        for words in ["not answering yet", "not answering", "container "]:
+            self.assertIn(words, source)
+            self.assertIn(words, self.body)
+        self.assertIn("is not running", source)
+        self.assertIn('"The docs site for NAME is not running"', self.body)
+
+    def test_init_says_what_it_does_when_a_hub_is_installed(self):
+        _, body = skill()
+        self.assertIn("(`/docs-site:hub`)", body)
+        self.assertIn("the hub wasn't updated", body)
+        self.assertIn(
+            "f\"the hub wasn't updated: ",
+            (PLUGIN / "scripts" / "scaffold.py").read_text(),
+        )

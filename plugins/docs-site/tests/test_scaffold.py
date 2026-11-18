@@ -255,6 +255,53 @@ class PortTest(RepoTest):
         self.assertFalse((self.root / "mkdocs.yml").exists())
 
 
+class HubTest(RepoTest):
+    def hub(self, result):
+        """Pretend a hub is installed, and that hub.py answers with result."""
+        compose = self.record.parent / "hub" / "compose.yml"
+        compose.parent.mkdir(parents=True)
+        compose.write_text("name: docs-site\n")
+        self.asked = []
+
+        def run_hub(root):
+            # By now the repo has to be in the record, or the hub can't find it.
+            self.asked.append((root, json.loads(self.record.read_text())))
+            return result
+
+        patch = mock.patch.object(scaffold, "run_hub", run_hub)
+        patch.start()
+        self.addCleanup(patch.stop)
+
+    def test_with_no_hub_installed_hub_py_is_not_run(self):
+        with mock.patch.object(scaffold, "run_hub", side_effect=AssertionError):
+            code, out, _ = run(self.root)
+        self.assertEqual(code, 0)
+        self.assertNotIn("hub", out)
+
+    def test_with_a_hub_the_repo_is_added_and_its_address_reported(self):
+        self.hub((0, "the hub serves it at http://my-project.localhost:8099\n", ""))
+        code, out, _ = run(self.root)
+        self.assertEqual(code, 0)
+        self.assertEqual(
+            out.splitlines()[-2:],
+            [
+                "  uvx zensical serve shows it at http://127.0.0.1:8100",
+                "  the hub serves it at http://my-project.localhost:8099",
+            ],
+        )
+        self.assertEqual(self.asked, [(self.root, {str(self.root): 8100})])
+
+    def test_a_hub_that_fails_is_reported_and_the_site_is_still_set_up(self):
+        self.hub((1, "", "hub.py: Cannot connect to the Docker daemon\n"))
+        code, out, _ = run(self.root)
+        self.assertEqual(code, 0)
+        self.assertEqual(
+            out.splitlines()[-1],
+            "  the hub wasn't updated: Cannot connect to the Docker daemon",
+        )
+        self.assertTrue((self.root / "mkdocs.yml").is_file())
+
+
 class InUseTest(unittest.TestCase):
     def test_a_bound_port_is_in_use_and_a_released_one_is_not(self):
         with socket.socket() as held:
