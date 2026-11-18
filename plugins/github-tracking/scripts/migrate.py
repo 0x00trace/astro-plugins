@@ -285,26 +285,22 @@ class GitHub:
         }
 
     def projects(self) -> list[dict]:
-        found = json.loads(
-            gb.gh(
-                "project",
-                "list",
-                "--owner",
-                self.owner,
-                "--format",
-                "json",
-                "--limit",
-                "200",
-            )
-        )
+        """The owner's projects, each with the repos linked to it."""
+        found = gb.graphql(
+            """query($owner:String!){repositoryOwner(login:$owner){... on ProjectV2Owner{
+            projectsV2(first:100){nodes{number title closed items{totalCount}
+            repositories(first:10){nodes{nameWithOwner}}}}}}}""",
+            owner=self.owner,
+        )["repositoryOwner"]["projectsV2"]["nodes"]
         return [
             {
-                "number": p["number"],
-                "title": p["title"],
-                "closed": p["closed"],
-                "items": p["items"]["totalCount"],
+                "number": x["number"],
+                "title": x["title"],
+                "closed": x["closed"],
+                "items": x["items"]["totalCount"],
+                "repos": [r["nameWithOwner"] for r in x["repositories"]["nodes"]],
             }
-            for p in found["projects"]
+            for x in found
         ]
 
     def link_project(self, number: int) -> None:
@@ -609,9 +605,17 @@ def plan_board(p: Plan) -> None:
             )
         return
     names = {gh.name.casefold()} | ({p.cork.name.casefold()} if p.cork else set())
-    candidates = [
+    named = [
         x for x in gh.projects() if not x["closed"] and x["title"].casefold() in names
     ]
+    # A project another repo is linked to is that repo's board, not this one's.
+    candidates = [x for x in named if not x["repos"]]
+    for x in named:
+        if x["repos"]:
+            p.notes.append(
+                f"project {x['number']} ({x['title']}) has the repo's name but is linked to "
+                f"{', '.join(x['repos'])}, so run leaves it alone"
+            )
     if candidates:
         pick = candidates[0]
         p.found.append(

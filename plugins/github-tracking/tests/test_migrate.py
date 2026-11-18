@@ -468,13 +468,33 @@ class BoardTest(RepoTest):
     def test_an_unlinked_project_with_the_repos_name_is_linked(self):
         self.gh.linked = False
         self.gh.project_list = [
-            {"number": 3, "title": "Other", "closed": False, "items": 1},
-            {"number": 23, "title": "GAME", "closed": False, "items": 62},
+            {"number": 3, "title": "Other", "closed": False, "items": 1, "repos": []},
+            {"number": 23, "title": "GAME", "closed": False, "items": 62, "repos": []},
         ]
         code, _out, _ = self.run_migrate("run")
         self.assertEqual(code, 0)
         self.assertIn(("link_project", 23), self.gh.calls)
         self.assertIn(("add_views",), self.gh.calls)
+
+    def test_a_project_with_the_repos_name_linked_to_another_repo_is_left_alone(self):
+        self.gh.linked = False
+        self.gh.project_list = [
+            {
+                "number": 23,
+                "title": "game",
+                "closed": False,
+                "items": 62,
+                "repos": ["me/game-legacy"],
+            }
+        ]
+        _, scan, _ = self.run_migrate("scan")
+        self.assertIn(
+            "project 23 (game) has the repo's name but is linked to me/game-legacy, so run leaves it alone",
+            scan,
+        )
+        self.run_migrate("run")
+        self.assertNotIn(("link_project", 23), self.gh.calls)
+        self.assertIn(("create_project", "game"), self.gh.calls)
 
     def test_with_no_project_to_link_it_makes_one(self):
         self.gh.linked = False
