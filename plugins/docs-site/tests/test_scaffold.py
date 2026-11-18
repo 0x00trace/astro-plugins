@@ -272,6 +272,10 @@ class HubTest(RepoTest):
         patch.start()
         self.addCleanup(patch.stop)
 
+    def test_run_hub_runs_hub_py_which_does_nothing_without_a_hub(self):
+        # The real call: this interpreter, hub.py beside scaffold.py, and the record in the environment.
+        self.assertEqual(scaffold.run_hub(self.root), (0, "", ""))
+
     def test_with_no_hub_installed_hub_py_is_not_run(self):
         with mock.patch.object(scaffold, "run_hub", side_effect=AssertionError):
             code, out, _ = run(self.root)
