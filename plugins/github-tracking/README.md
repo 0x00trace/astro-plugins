@@ -1,6 +1,6 @@
 # github-tracking
 
-Keeps a repo's GitHub issues, milestones and Projects board true while Claude works, so you can see on GitHub where a project stands instead of asking. Three skills: `/github-tracking:init` sets up a repo's board, `/github-tracking:migrate` moves a repo's corkboard items onto it, and `track` says how the board works. Claude loads track whenever it opens, starts, files or finishes an issue or PR in a repo with a GitHub remote, or you ask where a project stands. You can also run it as `/github-tracking:track`.
+Keeps a repo's GitHub issues, milestones and Projects board true while Claude works, so you can see on GitHub where a project stands instead of asking. Three skills: `/github-tracking:init` sets up a repo's board, `/github-tracking:migrate` moves a repo's corkboard items onto it, and `track` says which work gets an issue and how the board works. Claude loads track in a repo with a GitHub remote before it starts a change, whenever it opens, starts, files or finishes an issue or PR, and when you ask where a project stands. You can also run it as `/github-tracking:track`.
 
 ```
 /plugin install github-tracking --marketplace astrosteveo/astro-plugins
@@ -46,13 +46,18 @@ The track skill tells Claude how the board works and how to change it:
 - `board.py show` says where the board stands and marks what's out of step: a closed item that isn't Done, an open one that is, workflows that are off and views the board lacks.
 - When a repo has no board, Claude offers to set one up with `/github-tracking:init`, and remembers if you say no.
 
-The skills don't say how to work. Which work gets an issue, how issues are labelled and put in milestones, when to post a status update, and how to branch and commit are yours to set in your own CLAUDE.md and the repo's rules. For example:
+It also carries the author's rules for issues, which hold in every repo unless the repo's own CLAUDE.md or issue forms say otherwise:
+
+- Every change Claude commits gets an issue, except a trivial fix, and the issue moves to In Progress when the work starts. One issue is in progress at a time.
+- Work Claude finds along the way gets its own issue instead of growing the current change.
+- An issue's title is the commit scope and what to change, in lowercase, and its commit type is a label. Its body has Problem, Goal, Acceptance criteria and Open questions, so someone who wasn't in the conversation can start on it.
+- A PR's body says `Closes #N` for each issue it finishes, and each criterion is ticked before the PR merges.
+
+Branches, commits, merges and status updates stay yours to set in your own CLAUDE.md and the repo's rules. Claude loads skills by their descriptions, so to have it load track before every change, add a line like this to your CLAUDE.md:
 
 ```markdown
 # Tracking work
-In a repo on GitHub, track the work in its issues and the Projects board linked to it:
-- Every change I commit gets an issue. Move it to In Progress on the board when you start it.
-- A PR's body says `Closes #N` for each issue it finishes.
+In a repo on GitHub, load github-tracking's track skill before you start a change. It says which work gets an issue and how to write and track one.
 ```
 
 ## The script

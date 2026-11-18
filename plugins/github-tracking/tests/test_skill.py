@@ -73,24 +73,33 @@ class BothSkillsTest(unittest.TestCase):
         for command in approved:
             self.assertRegex(body, rf"(?m)^{command} ")
 
-    def test_how_the_work_is_done_is_left_to_the_users_rules(self):
-        # The skills say how GitHub and board.py work. Which work gets an issue, labels,
-        # milestones, branches and commits are the user's to set in their CLAUDE.md.
-        for name in SKILLS:
-            with self.subTest(name):
-                body = skill(name)[1]
-                self.assertIn("the user's own rules and the repo's", body.lower())
-                for rule in [
-                    "Start each change",
-                    "File what you find",
-                    "Plan a larger step",
-                ]:
-                    self.assertNotIn(f"## {rule}", body)
-
 
 class TrackTest(unittest.TestCase):
     def setUp(self):
         self.front, self.body = skill("track")
+
+    def test_it_carries_the_user_s_rules_for_issues(self):
+        # Claude Code's docs put a procedure for one task in that task's skill, not in a
+        # CLAUDE.md that loads in every session (PROJECT.md, Decisions, 2026-11-18).
+        self.assertIn("before you start a change", field(self.front, "description"))
+        rules = self.body[
+            self.body.index("## Which work gets an issue") : self.body.index(
+                "## What GitHub does on its own"
+            )
+        ]
+        self.assertIn("follow the repo", rules)
+        for rule in [
+            "Every change you commit gets an issue",
+            "one issue in progress at a time",
+            "gets its own issue",
+            "`Closes #N`",
+            "The commit type goes in a label",
+            "Tick each criterion",
+        ]:
+            self.assertIn(rule, rules)
+        headings = ["Problem", "Goal", "Acceptance criteria", "Open questions"]
+        at = [rules.index(f"`### {heading}`") for heading in headings]
+        self.assertEqual(at, sorted(at))
 
     def test_every_update_status_it_names_is_one_board_py_takes(self):
         named = set(
@@ -125,6 +134,7 @@ class InitTest(unittest.TestCase):
 
     def test_it_makes_no_labels_or_milestones(self):
         self.assertIn("It makes no labels or milestones.", self.body)
+        self.assertIn("The track skill makes an issue's label", self.body)
         self.assertNotIn("gh label create", self.body)
         self.assertNotIn("/milestones -f", self.body)
 

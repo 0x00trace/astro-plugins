@@ -1,6 +1,6 @@
 ---
 name: track
-description: Use in a repo with a GitHub remote before you open, start, file or finish an issue or PR, and before you say where a project stands. Says how the repo's issues, milestones and GitHub Projects board work, and how its script moves items, makes sub-issues and posts status updates, so the board stays true as you work. When the repo has no board, it offers /github-tracking:init.
+description: Use in a repo with a GitHub remote before you start a change, before you open, start, file or finish an issue or PR, and before you say where a project stands. Says which work gets an issue and how to write one, how the repo's issues, milestones and GitHub Projects board work, and how its script moves items, makes sub-issues and posts status updates, so the board stays true as you work. When the repo has no board, it offers /github-tracking:init.
 allowed-tools: Bash(python3 ${CLAUDE_PLUGIN_ROOT}/scripts/board.py *)
 ---
 
@@ -17,7 +17,26 @@ python3 ${CLAUDE_PLUGIN_ROOT}/scripts/board.py sub 10 11 12 13         # 11, 12 
 python3 ${CLAUDE_PLUGIN_ROOT}/scripts/board.py update on-track FILE    # a status update, its body from FILE or - for stdin
 ```
 
-Which work gets an issue, how issues are labelled, titled and put in milestones, when to post a status update, and how to branch and commit follow the user's own rules and the repo's. This skill doesn't decide them.
+## Which work gets an issue, and how to write one
+
+These are the user's rules in every repo. Where a repo's own rules say otherwise, such as its CLAUDE.md or its issue forms, follow the repo.
+
+- Every change you commit gets an issue, except a trivial fix such as a typo or a one-line change. Move it to In Progress on the board when you start it.
+- Keep one issue in progress at a time: finish it, or move it back to Todo, before starting another.
+- Work you find along the way gets its own issue instead of growing the current change, unless it's trivial.
+- A PR's body says `Closes #N` for each issue it finishes.
+- Write each issue so someone who wasn't in the conversation can start on it:
+  - Title: the commit scope and what to change, in lowercase, such as `docs-site: add a switcher on each hub site`. The commit type goes in a label (`feat`, `fix`, `docs`, `test`, `chore` or `refactor`), not the title. Make the label with `gh label create` if the repo lacks it, and add the repo's other labels where they fit.
+  - Body, under these headings in this order, the same ones the user's GitHub issue forms use:
+    1. `### Problem`: what's wrong or missing, and the evidence: where it was found (link the issue or PR), the command and its output, or the numbers.
+    2. `### Goal`: what to change, in a sentence or two, as the result the user gets. Leave how to build it to the plan unless the cause is already known.
+    3. `### Acceptance criteria`: a checklist (`- [ ]`). Each item is one result that will be true when the issue is done, that someone can check as pass or fail, and that says how to check it: a named test, a command and the output it prints, or a screenshot. Give numbers for speed, size or counts. Include what must stay as it is when the change could break it. Describe the result, not how it's built.
+    4. `### Open questions`: questions the plan has to answer, if any. When an answer changes what the issue delivers, update the criteria in the issue.
+  - When a repo's issue form has other sections, such as Steps to reproduce, keep them after Problem.
+  - Tick each criterion in the issue once you've checked it, before the PR that closes the issue merges.
+  - A trivial issue can cover Problem and Goal in one sentence each, with one criterion.
+
+Branches, commits, merges and status updates follow the user's own rules and the repo's.
 
 ## What GitHub does on its own, and what it doesn't
 
