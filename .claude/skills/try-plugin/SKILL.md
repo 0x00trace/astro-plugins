@@ -32,7 +32,7 @@ tmux capture-pane -t mod -p      # read the screen
 - Typing a slash command such as `/docs-site:init` opens the autocomplete menu, and the first `C-m` only picks the entry from it. Send `Escape` before the `C-m`, or a second `C-m`, and check the screen shows the command running.
 - The test session follows the user's global CLAUDE.md, so it may run checks of its own after the plugin is done, such as starting a server in a clean login shell and stopping whatever holds its port. Say in the prompt what it shouldn't run, such as "don't serve the site", and press `Escape` on a command that starts, stops or kills a process.
 - A question dialog ends with "Enter to select". Move with `Down` and pick with `Enter`. With several questions, each answer moves on to the next. In a multi-select, `Enter` ticks the focused option: go down to Submit, press `Enter`, then `Enter` again on "Submit answers".
-- A permission prompt asks "Do you want to proceed?", and `Enter` picks Yes. Read the command first and approve only commands that read. Press `Escape` for anything else.
+- A permission prompt asks "Do you want to proceed?", or "Do you want to make this edit to FILE?" for a file edit, and `Enter` picks Yes. Read the command first and approve only commands that read. Press `Escape` for anything else.
 - After editing the plugin, send `/reload-plugins` to pick up the change.
 
 ## Read what happened
