@@ -5,7 +5,8 @@ install writes a Docker Compose project in the docs-site data folder: one contai
 running `zensical serve` from Zensical's own image, and a Caddy proxy on one host port. Each site
 is at http://NAME.localhost:PORT and the dashboard at http://localhost:PORT. The sites publish no
 host ports, so `uvx zensical serve` in a repo still works while the hub runs. The projects are the
-repos scaffold.py has recorded. Stdlib only, for Python 3.11 and later.
+repos scaffold.py has recorded. Only install, start, stop and remove change whether the hub runs:
+update, which scaffold.py runs, leaves a stopped hub stopped. Stdlib only, for Python 3.11 and later.
 """
 
 from __future__ import annotations
@@ -396,6 +397,13 @@ def installed_port(hub: Path) -> int | None:
     return int(found.group(1)) if found else None
 
 
+def running(hub: Path) -> bool:
+    """Whether the hub's proxy is running. The hub counts as stopped when it isn't."""
+    return (hub / "compose.yml").is_file() and bool(
+        compose(hub, "ps", "-q", "proxy", check=False).strip()
+    )
+
+
 def reload_proxy(hub: Path) -> None:
     """Have the running proxy read its routes again. It can take a moment to be ready."""
     for attempt in range(6):
@@ -430,14 +438,16 @@ def said(site: Site, port: int, down: set[str]) -> str:
     return address(site.name, port)
 
 
-def apply(port: int) -> tuple[list[Site], list[str], set[str]]:
-    """Write the hub's files, start what isn't running, and wait for the sites to answer."""
+def apply(port: int, start: bool = True) -> tuple[list[Site], list[str], set[str]]:
+    """Write the hub's files, then start what isn't running and wait for the sites to answer.
+
+    With start false, it only creates a new site's container and drops a gone one's, so a stopped
+    hub stays stopped.
+    """
     hub = hub_dir()
     docker("compose", "version")
     found = sites()
-    had_proxy = (hub / "compose.yml").is_file() and bool(
-        compose(hub, "ps", "-q", "proxy", check=False).strip()
-    )
+    had_proxy = running(hub)
     texts = (
         compose_text(found, port, hub, f"{os.getuid()}:{os.getgid()}", ipv6_loopback()),
         caddy_text(found, port),
@@ -445,6 +455,9 @@ def apply(port: int) -> tuple[list[Site], list[str], set[str]]:
     )
     states = {name: write(hub / name, text) for name, text in zip(FILES, texts)}
     report = [f"{state} {name}" for name, state in states.items()]
+    if not start:
+        compose(hub, "up", "--no-start", "--remove-orphans")
+        return found, report, set()
     compose(hub, "up", "-d", "--remove-orphans")
     if had_proxy and states["caddy/Caddyfile"] != "kept":
         reload_proxy(hub)
@@ -467,12 +480,46 @@ def install(port: int | None) -> list[str]:
     return [f"{hub}:"] + [f"  {line}" for line in report]
 
 
+def start() -> list[str]:
+    """Start an installed hub: install's run, without ever making a new hub."""
+    if installed_port(hub_dir()) is None:
+        raise Fail("the hub isn't installed: hub.py install sets it up")
+    return install(None)
+
+
+def stop() -> list[str]:
+    hub = hub_dir()
+    if not (hub / "compose.yml").is_file():
+        return [f"{hub}:", "  there's no hub to stop"]
+    compose(hub, "stop")
+    return [
+        f"{hub}:",
+        "  stopped the dashboard and every site",
+        "  they stay stopped, through a reboot too, until hub.py start",
+    ]
+
+
 def update(repo: str | None) -> list[str]:
-    """Bring an installed hub in line with the recorded repos. Does nothing when there's no hub."""
+    """Bring an installed hub in line with the recorded repos, and leave it running or stopped.
+
+    Does nothing when there's no hub.
+    """
     hub = hub_dir()
     port = installed_port(hub)
     if port is None:
         return []
+    if not running(hub):
+        found, _, _ = apply(port, start=False)
+        if repo is None:
+            return ["the hub is stopped: hub.py start starts it"] + [
+                f"{site.name}: {address(site.name, port)}" for site in found
+            ]
+        root = Path(repo).resolve()
+        return [
+            f"the hub is stopped: hub.py start serves it at {address(site.name, port)}"
+            for site in found
+            if site.root.resolve() == root
+        ]
     found, _, down = apply(port)
     if repo is None:
         return [f"{site.name}: {said(site, port, down)}" for site in found]
@@ -505,10 +552,15 @@ def status() -> tuple[list[str], bool]:
         code = answers(port, host)
         good = code == 200
         ok = ok and good
-        answer = "answering" if good else f"not answering ({code or 'no reply'})"
-        lines.append(
-            f"  {label}: {url}  container {state.get(service, 'missing')}, {answer}"
-        )
+        now = state.get(service)
+        if now in ("exited", "created"):
+            where = "stopped: hub.py start starts it"
+        elif now is None:
+            where = "no container: hub.py start creates it"
+        else:
+            answer = "answering" if good else f"not answering ({code or 'no reply'})"
+            where = f"container {now}, {answer}"
+        lines.append(f"  {label}: {url}  {where}")
 
     line("dashboard", "proxy", "localhost", f"http://localhost:{port}")
     for site in sites():
@@ -546,6 +598,14 @@ def main(argv: list[str] | None = None) -> int:
         help="bring an installed hub up to date; does nothing when there's none",
     )
     u.add_argument("--repo", help="say only where this repo's site is")
+    commands.add_parser(
+        "start",
+        help="start an installed hub, and bring it up to date; refuses when there's none",
+    )
+    commands.add_parser(
+        "stop",
+        help="stop the dashboard and every site; they stay stopped until start",
+    )
     commands.add_parser("status", help="whether the dashboard and each site answer")
     commands.add_parser(
         "remove", help="stop the hub and remove its containers and folder"
@@ -558,6 +618,10 @@ def main(argv: list[str] | None = None) -> int:
             lines = update(args.repo)
             if lines:
                 print("\n".join(lines))
+        elif args.command == "start":
+            print("\n".join(start()))
+        elif args.command == "stop":
+            print("\n".join(stop()))
         elif args.command == "status":
             lines, ok = status()
             print("\n".join(lines))
