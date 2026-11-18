@@ -92,7 +92,11 @@ def summary(index: Path) -> str:
 
 
 def sites() -> list[Site]:
-    """The recorded repos, in the order they were recorded, each with a name no other has."""
+    """The recorded repos, in the order they were recorded, each with a name no other has.
+
+    A folder counts as a repo while it has a config or a .git: a repo on a branch without its
+    mkdocs.yml stays, and an empty folder left where a repo was doesn't.
+    """
     ports = scaffold.load_ports(scaffold.ports_file())
     found, taken = [], set()
     for root, _ in sorted(ports.items(), key=lambda item: (item[1], item[0])):
@@ -100,6 +104,8 @@ def sites() -> list[Site]:
         config = next(
             (path / c for c in scaffold.CONFIGS if (path / c).is_file()), None
         )
+        if not config and not (path / ".git").exists():
+            continue
         text = config.read_text() if config else ""
         base = slug(path.name)
         name, n = base, 1
@@ -130,7 +136,11 @@ def bind(source: object, target: object, read_only: bool = False) -> list[str]:
         f"        source: {quoted(source)}",
         f"        target: {quoted(target)}",
     ]
-    return lines + (["        read_only: true"] if read_only else [])
+    if read_only:
+        lines.append("        read_only: true")
+    # Without this, Docker makes a missing source folder itself, as root: a repo deleted while
+    # its site runs would come back as an empty folder its owner can't remove.
+    return [*lines, "        bind:", "          create_host_path: false"]
 
 
 def compose_text(found: list[Site], port: int, hub: Path, user: str, ipv6: bool) -> str:

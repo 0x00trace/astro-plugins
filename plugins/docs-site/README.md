@@ -51,7 +51,7 @@ It's a Docker Compose project, `docs-site`, that `scripts/hub.py` writes to `~/.
 - One Caddy container routes the names to them. Only it has a host port, so `uvx zensical serve` in a repo still works while the hub runs.
 - Containers restart if they exit, and start with Docker at boot. A site whose repo is on a branch with no `mkdocs.yml` comes back by itself when the file does, and until then its address says the site isn't running and how to read its log.
 
-Once the hub is installed, `/docs-site:init` adds each new repo to it.
+Once the hub is installed, `/docs-site:init` adds each new repo to it. A repo whose folder you delete stops being served, and the next `hub.py install` drops it. The hub's mounts never create a missing folder, which Docker would otherwise make as root where the repo was.
 
 ```
 hub.py install              # write the hub's files and start it; safe to run again
