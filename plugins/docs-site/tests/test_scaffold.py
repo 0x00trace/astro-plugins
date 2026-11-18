@@ -1,10 +1,15 @@
 import contextlib
 import io
+import json
+import os
+import shutil
+import socket
 import subprocess
 import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 PLUGIN = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PLUGIN / "scripts"))
@@ -26,12 +31,28 @@ def run(cwd, *args):
 
 
 class RepoTest(unittest.TestCase):
+    """A git repo in a temporary folder, with its own record of ports and no port in use."""
+
     def setUp(self):
         tmp = tempfile.TemporaryDirectory()
         self.addCleanup(tmp.cleanup)
-        self.root = Path(tmp.name).resolve() / "my-project"
-        self.root.mkdir()
-        subprocess.run(["git", "init", "-q"], cwd=self.root, check=True)
+        self.tmp = Path(tmp.name).resolve()
+        self.root = self.repo("my-project")
+        data = self.tmp / "data"
+        env = mock.patch.dict(os.environ, {"XDG_DATA_HOME": str(data)})
+        env.start()
+        self.addCleanup(env.stop)
+        self.record = data / "docs-site" / "ports.json"
+        self.busy = set()
+        probe = mock.patch.object(scaffold, "in_use", lambda port: port in self.busy)
+        probe.start()
+        self.addCleanup(probe.stop)
+
+    def repo(self, name):
+        root = self.tmp / name
+        root.mkdir()
+        subprocess.run(["git", "init", "-q"], cwd=root, check=True)
+        return root
 
     def remote(self, url):
         subprocess.run(
@@ -40,6 +61,9 @@ class RepoTest(unittest.TestCase):
 
     def read(self, name):
         return (self.root / name).read_text()
+
+    def ports(self):
+        return json.loads(self.record.read_text())
 
 
 class NewRepoTest(RepoTest):
@@ -50,7 +74,8 @@ class NewRepoTest(RepoTest):
         self.assertEqual(
             self.read("mkdocs.yml"),
             'site_name: "my-project"\n'
-            'repo_url: "https://github.com/someone/my-project"\n' + THEME,
+            'repo_url: "https://github.com/someone/my-project"\n'
+            'dev_addr: "127.0.0.1:8100"\n' + THEME,
         )
         self.assertEqual(
             self.read("docs/index.md"), "# my-project\n\nTools for my project.\n"
@@ -60,9 +85,10 @@ class NewRepoTest(RepoTest):
             out.splitlines(),
             [
                 f"{self.root}:",
-                "  created mkdocs.yml",
+                "  created mkdocs.yml, with dev_addr 127.0.0.1:8100",
                 "  created docs/index.md",
                 "  created .gitignore with site/",
+                "  uvx zensical serve shows it at http://127.0.0.1:8100",
             ],
         )
 
@@ -73,19 +99,21 @@ class NewRepoTest(RepoTest):
     def test_a_second_run_changes_nothing(self):
         self.remote("https://github.com/someone/my-project.git")
         run(self.root, "--description", "First.")
-        before = {
-            p: (self.root / p).read_text()
-            for p in ("mkdocs.yml", "docs/index.md", ".gitignore")
-        }
+        files = ("mkdocs.yml", "docs/index.md", ".gitignore")
+        before = {p: self.read(p) for p in files}
+        record = self.record.read_text()
         code, out, _ = run(self.root, "--name", "Other", "--description", "Second.")
         self.assertEqual(code, 0)
-        self.assertEqual({p: (self.root / p).read_text() for p in before}, before)
+        self.assertEqual({p: self.read(p) for p in files}, before)
+        self.assertEqual(self.record.read_text(), record)
         self.assertEqual(
             out.splitlines()[1:],
             [
                 "  kept mkdocs.yml (it exists)",
+                "  kept dev_addr 127.0.0.1:8100 in mkdocs.yml",
                 "  kept docs/index.md (it exists)",
                 "  kept .gitignore (it ignores site/)",
+                "  uvx zensical serve shows it at http://127.0.0.1:8100",
             ],
         )
 
@@ -114,23 +142,139 @@ class NewRepoTest(RepoTest):
         self.assertEqual(out.splitlines()[0], f"{self.root}:")
 
     def test_outside_a_git_repo_it_uses_the_folder_it_runs_in(self):
-        with tempfile.TemporaryDirectory() as plain:
-            folder = Path(plain).resolve() / "notes"
-            folder.mkdir()
-            run(folder)
-            self.assertTrue((folder / "mkdocs.yml").is_file())
-            self.assertIn('site_name: "notes"', (folder / "mkdocs.yml").read_text())
+        folder = self.tmp / "notes"
+        folder.mkdir()
+        run(folder)
+        self.assertTrue((folder / "mkdocs.yml").is_file())
+        self.assertIn('site_name: "notes"', (folder / "mkdocs.yml").read_text())
+
+
+class PortTest(RepoTest):
+    def test_each_repo_gets_its_own_port_and_keeps_it(self):
+        other = self.repo("other")
+        run(self.root)
+        run(other)
+        run(self.root)
+        self.assertIn('dev_addr: "127.0.0.1:8100"', self.read("mkdocs.yml"))
+        self.assertIn('dev_addr: "127.0.0.1:8101"', (other / "mkdocs.yml").read_text())
+        self.assertEqual(self.ports(), {str(self.root): 8100, str(other): 8101})
+
+    def test_a_port_in_use_now_is_skipped(self):
+        self.busy = {8100, 8101}
+        run(self.root)
+        self.assertIn('dev_addr: "127.0.0.1:8102"', self.read("mkdocs.yml"))
+
+    def test_a_repo_keeps_its_port_while_its_own_site_is_running(self):
+        run(self.root)
+        self.busy = {8100}
+        _, out, _ = run(self.root)
+        self.assertIn("  kept dev_addr 127.0.0.1:8100 in mkdocs.yml", out.splitlines())
+
+    def test_a_config_without_dev_addr_gets_the_line(self):
+        (self.root / "mkdocs.yml").write_text("site_name: Mine")
+        _, out, _ = run(self.root)
+        self.assertEqual(
+            self.read("mkdocs.yml"), 'site_name: Mine\ndev_addr: "127.0.0.1:8100"\n'
+        )
+        self.assertIn("  added dev_addr 127.0.0.1:8100 to mkdocs.yml", out.splitlines())
+
+    def test_a_configs_own_free_port_is_kept_and_recorded(self):
+        (self.root / "mkdocs.yml").write_text(
+            "site_name: Mine\ndev_addr: localhost:8500\n"
+        )
+        run(self.root)
+        self.assertEqual(
+            self.read("mkdocs.yml"), "site_name: Mine\ndev_addr: localhost:8500\n"
+        )
+        self.assertEqual(self.ports(), {str(self.root): 8500})
+
+    def test_a_config_with_another_repos_port_gets_a_new_one(self):
+        other = self.repo("other")
+        run(other)
+        shutil.copy(other / "mkdocs.yml", self.root / "mkdocs.yml")
+        code, out, _ = run(self.root)
+        self.assertEqual(code, 0)
+        self.assertIn('dev_addr: "127.0.0.1:8101"', self.read("mkdocs.yml"))
+        self.assertIn(
+            "  changed dev_addr in mkdocs.yml from 127.0.0.1:8100 to 127.0.0.1:8101,"
+            f" as 8100 is the port of {other}",
+            out.splitlines(),
+        )
+        self.assertEqual(self.ports(), {str(other): 8100, str(self.root): 8101})
+
+    def test_a_repo_that_is_gone_gives_its_port_back(self):
+        gone = self.repo("gone")
+        run(gone)
+        shutil.rmtree(gone)
+        run(self.root)
+        self.assertIn('dev_addr: "127.0.0.1:8100"', self.read("mkdocs.yml"))
+        self.assertEqual(self.ports(), {str(self.root): 8100})
+
+    def test_a_zensical_toml_without_dev_addr_is_left_alone_and_named(self):
+        (self.root / "zensical.toml").write_text('[project]\nsite_name = "x"\n')
+        _, out, _ = run(self.root)
+        self.assertEqual(self.read("zensical.toml"), '[project]\nsite_name = "x"\n')
+        self.assertIn(
+            '  zensical.toml has no dev_addr: add dev_addr = "127.0.0.1:8100" under [project]',
+            out.splitlines(),
+        )
+
+    def test_a_zensical_toml_with_another_repos_port_is_changed(self):
+        other = self.repo("other")
+        run(other)
+        (self.root / "zensical.toml").write_text(
+            '[project]\ndev_addr = "127.0.0.1:8100"  # serve here\n'
+        )
+        run(self.root)
+        self.assertEqual(
+            self.read("zensical.toml"),
+            '[project]\ndev_addr = "127.0.0.1:8101"  # serve here\n',
+        )
+
+    def test_an_unreadable_dev_addr_fails_and_changes_nothing(self):
+        (self.root / "mkdocs.yml").write_text("dev_addr: somewhere\n")
+        code, out, err = run(self.root)
+        self.assertEqual(code, 1)
+        self.assertEqual(out, "")
+        self.assertIn("can't read a port in mkdocs.yml's dev_addr: somewhere", err)
+        self.assertEqual(self.read("mkdocs.yml"), "dev_addr: somewhere\n")
+        self.assertFalse(self.record.exists())
+
+    def test_a_broken_record_fails_with_its_path(self):
+        self.record.parent.mkdir(parents=True)
+        self.record.write_text("{")
+        code, _, err = run(self.root)
+        self.assertEqual(code, 1)
+        self.assertIn(f"{self.record} isn't valid JSON", err)
+
+    def test_when_every_port_is_taken_it_fails(self):
+        self.busy = set(scaffold.PORTS)
+        code, _, err = run(self.root)
+        self.assertEqual(code, 1)
+        self.assertIn("no free port from 8100 to 8999", err)
+        self.assertFalse((self.root / "mkdocs.yml").exists())
+
+
+class InUseTest(unittest.TestCase):
+    def test_a_bound_port_is_in_use_and_a_released_one_is_not(self):
+        with socket.socket() as held:
+            held.bind((scaffold.HOST, 0))
+            held.listen()
+            port = held.getsockname()[1]
+            self.assertTrue(scaffold.in_use(port))
+        self.assertFalse(scaffold.in_use(port))
 
 
 class ExistingFilesTest(RepoTest):
     def test_an_existing_config_is_kept_and_its_docs_dir_used(self):
         (self.root / "mkdocs.yml").write_text(
-            "site_name: Mine\ndocs_dir: handbook  # pages\n"
+            'site_name: Mine\ndocs_dir: handbook  # pages\ndev_addr: "127.0.0.1:8100"\n'
         )
         code, out, _ = run(self.root)
         self.assertEqual(code, 0)
         self.assertEqual(
-            self.read("mkdocs.yml"), "site_name: Mine\ndocs_dir: handbook  # pages\n"
+            self.read("mkdocs.yml"),
+            'site_name: Mine\ndocs_dir: handbook  # pages\ndev_addr: "127.0.0.1:8100"\n',
         )
         self.assertTrue((self.root / "handbook" / "index.md").is_file())
         self.assertFalse((self.root / "docs").exists())
@@ -171,7 +315,8 @@ class DocsDirTest(RepoTest):
         self.assertEqual(code, 0)
         self.assertEqual(
             self.read("mkdocs.yml"),
-            'site_name: "my-project"\ndocs_dir: ".project/docs"\n' + THEME,
+            'site_name: "my-project"\ndocs_dir: ".project/docs"\n'
+            'dev_addr: "127.0.0.1:8100"\n' + THEME,
         )
         self.assertEqual(self.read(".project/docs/index.md"), "# my-project\n")
         self.assertEqual(self.read(".project/docs/cli.md"), "# CLI\n")
@@ -189,6 +334,7 @@ class DocsDirTest(RepoTest):
                 self.assertEqual(out, "")
                 self.assertTrue(err.startswith("scaffold.py: --docs-dir "))
                 self.assertEqual(sorted(p.name for p in self.root.iterdir()), [".git"])
+                self.assertFalse(self.record.exists())
 
 
 class WebUrlTest(unittest.TestCase):
