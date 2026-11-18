@@ -202,16 +202,19 @@ def caddy_text(found: list[Site], port: int) -> str:
     return "\n".join(lines) + "\n"
 
 
+# Three lines of a list on Zensical's indigo, inline so the page needs no other file.
+ICON = (
+    "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E"
+    "%3Crect width='16' height='16' rx='3.5' fill='%234051b5'/%3E"
+    "%3Cpath d='M4 5h8M4 8h8M4 11h5' stroke='%23fff' stroke-width='1.6' stroke-linecap='round'/%3E"
+    "%3C/svg%3E"
+)
+# Always dark, like the sites scaffold.py sets up (scheme: slate), whatever the system prefers.
 STYLE = """
 :root {
-  --bg: #ffffff; --ink: #16181d; --muted: #585d6b; --faint: #9a9fac;
-  --rule: #e4e6ec; --accent: #4051b5;
-}
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: hsl(225 15% 8%); --ink: hsl(225 15% 92%); --muted: hsl(225 12% 68%);
-    --faint: hsl(225 10% 44%); --rule: hsl(225 14% 17%); --accent: #8fa0ff;
-  }
+  color-scheme: dark;
+  --bg: hsl(225 15% 5%); --ink: hsl(225 15% 93%); --muted: hsl(225 15% 90% / 0.62);
+  --faint: hsl(225 15% 90% / 0.34); --rule: hsl(225 15% 90% / 0.12); --accent: #8fa0ff;
 }
 * { box-sizing: border-box; }
 body {
@@ -290,7 +293,8 @@ def page_text(found: list[Site], port: int) -> str:
                 "<head>",
                 '<meta charset="utf-8">',
                 '<meta name="viewport" content="width=device-width, initial-scale=1">',
-                '<meta name="color-scheme" content="light dark">',
+                '<meta name="color-scheme" content="dark">',
+                f'<link rel="icon" href="{ICON}">',
                 "<title>Docs on this machine</title>",
                 "<style>",
                 STYLE,
