@@ -81,17 +81,43 @@ def repo_url(root: Path) -> str | None:
 
 
 def quoted(text: str) -> str:
-    # A JSON string is a valid YAML double-quoted scalar, whatever the text holds.
+    # A JSON string is a valid YAML or TOML double-quoted string, whatever the text holds.
     return json.dumps(text, ensure_ascii=False)
 
 
+# Text YAML reads as a plain string: letters, digits and . _ / : @ + -, in words split by single
+# spaces, starting with a letter, digit, . _ or /, with no ": " and no trailing colon.
+PLAIN = re.compile(r"[A-Za-z0-9._/][A-Za-z0-9._/:@+-]*(?: [A-Za-z0-9._/:@+-]+)*")
+# Plain text YAML reads as something else: a bool, null, a number, a base-60 number or a date.
+NOT_TEXT = re.compile(
+    r"(?i)y|n|yes|no|on|off|true|false|null|~|[-+]?\.(?:inf|nan)"
+    r"|[-+]?(?:\d[\d_]*(?:\.\d*)?|\.\d+)(?:e[-+]?\d+)?|0x[0-9a-f_]+|0o?[0-7_]+"
+    r"|\d+(?::[0-5]?\d)+(?:\.\d*)?|\d{4}-\d\d?-\d\d?.*"
+)
+
+
+def scalar(text: str) -> str:
+    """text as a YAML value: plain when YAML reads it as that text, else double-quoted.
+
+    Plain values keep a repo's formatter happy whichever quotes it prefers.
+    """
+    if (
+        PLAIN.fullmatch(text)
+        and not NOT_TEXT.fullmatch(text)
+        and ": " not in text
+        and not text.endswith(":")
+    ):
+        return text
+    return quoted(text)
+
+
 def config(name: str, url: str | None, docs_dir: str, port: int) -> str:
-    lines = [f"site_name: {quoted(name)}"]
+    lines = [f"site_name: {scalar(name)}"]
     if url:
-        lines.append(f"repo_url: {quoted(url)}")
+        lines.append(f"repo_url: {scalar(url)}")
     if docs_dir != "docs":
-        lines.append(f"docs_dir: {quoted(docs_dir)}")
-    lines.append(f"dev_addr: {quoted(f'{HOST}:{port}')}")
+        lines.append(f"docs_dir: {scalar(docs_dir)}")
+    lines.append(f"dev_addr: {scalar(f'{HOST}:{port}')}")
     return "\n".join(lines) + "\n" + THEME
 
 
@@ -165,7 +191,8 @@ def port_in_config(
     elif found:
         host = found.group(2).rsplit(":", 1)[0]
         owner = next(root for root, p in ports.items() if p == current and root != key)
-        line = f"{found.group(1)}{quoted(f'{host}:{port}')}{found.group(3)}"
+        value = quoted if path.suffix == ".toml" else scalar
+        line = f"{found.group(1)}{value(f'{host}:{port}')}{found.group(3)}"
         path.write_text(text[: found.start()] + line + text[found.end() :])
         report.append(
             f"changed dev_addr in {path.name} from {found.group(2)} to {host}:{port},"
@@ -178,7 +205,7 @@ def port_in_config(
     else:
         if text and not text.endswith("\n"):
             text += "\n"
-        path.write_text(text + f"dev_addr: {quoted(f'{HOST}:{port}')}\n")
+        path.write_text(text + f"dev_addr: {scalar(f'{HOST}:{port}')}\n")
         report.append(f"added dev_addr {HOST}:{port} to {path.name}")
     return port
 
@@ -244,17 +271,20 @@ def scaffold(
 
     ignore = root / ".gitignore"
     text = ignore.read_text() if ignore.is_file() else ""
-    if any(
-        line.strip() in ("site/", "/site/", "site", "/site")
-        for line in text.splitlines()
-    ):
-        report.append("kept .gitignore (it ignores site/)")
+    have = {line.strip().strip("/") for line in text.splitlines()}
+    # Zensical builds the site into site/ and keeps a cache in .cache/.
+    missing = [x for x in ("site/", ".cache/") if x.strip("/") not in have]
+    if not missing:
+        report.append("kept .gitignore (it ignores site/ and .cache/)")
     else:
         if text and not text.endswith("\n"):
             text += "\n"
-        ignore.write_text(text + "site/\n")
+        ignore.write_text(text + "".join(f"{x}\n" for x in missing))
+        listed = " and ".join(missing)
         report.append(
-            "added site/ to .gitignore" if text else "created .gitignore with site/"
+            f"added {listed} to .gitignore"
+            if text
+            else f"created .gitignore with {listed}"
         )
     report.append(f"uvx zensical serve shows it at http://{HOST}:{port}")
     return [f"{root}:"] + [f"  {line}" for line in report]
