@@ -24,7 +24,6 @@ The author: a solo developer on Linux who uses Claude Code for hobby projects. T
 
 - Settings or features for needs other than the author's, such as team or org setups. Why: these are personal plugins for solo hobby projects.
 - Doing what Claude Code already does itself. A plugin is dropped once Claude Code ships the same feature. Why: a plugin like that is upkeep with no gain.
-- Carrying the author's own workflow habits, such as how to use git, which work gets an issue, or where docs go. Why: those live in the author's global CLAUDE.md, so installing a plugin doesn't bring the author's habits with it. A plugin can still say how to use its own tool well.
 
 ## Success looks like
 
@@ -76,6 +75,7 @@ The author: a solo developer on Linux who uses Claude Code for hobby projects. T
 - 2026-11-17: Narrowed the workflow non-goal, replacing the 2026-11-16 line that plugins don't tell Claude how to work: a plugin leaves out the author's own habits, such as git, issue tracking and where docs go, and can still say how to use its own tool well. Why: every skill is instructions to Claude, so the broad wording read as ruling out any guidance a plugin gives, and the author suspected it was hurting some sessions.
 - 2026-11-17: docs-site's hub serves every repo's docs at once from Docker: a container per repo running `zensical serve` from Zensical's own image, behind one Caddy proxy on one port, with each site at `NAME.localhost:8099` and a dashboard page that lists them. systemd units with a port per site were turned down. Why: the author wanted the hub contained in one thing that starts and stops together, and addresses by name rather than a port per project; with one host port in all, a site can't lose its port to another program, and `uvx zensical serve` still works in a repo while the hub runs. The proxy sends `Host` and `Origin` as `localhost`, because Zensical 0.1.2's server answers 400 otherwise, so a Zensical update could break the reload on a change.
 - 2026-11-18: docs-site's hub starts and stops with `hub.py start` and `stop`, also run as `/docs-site:hub start` and `stop`, and only `install`, `start`, `stop` and `remove` change whether it runs. `/docs-site:init` leaves a stopped hub stopped. Why: Docker Compose alone left `/docs-site:init` starting a stopped hub and `status` calling a stopped site's container exited ([0002](docs/decisions/0002-the-hub-starts-and-stops-with-hub-py.md)).
+- 2026-11-18: Dropped the workflow non-goal, replacing the 2026-11-16 line that plugins don't tell Claude how to work and the 2026-11-17 line that narrowed it. An instruction goes where Claude Code's docs put it: a rule Claude needs in every session goes in CLAUDE.md, and a procedure or convention for one task goes in that task's skill, which a plugin can carry. Why: the non-goal came from AP-20, which cited no source, and it kept the author's issue-tracking procedure in the global CLAUDE.md, loaded in every session, instead of in the track skill that loads when Claude files an issue.
 
 ## Open questions
 
