@@ -86,13 +86,32 @@ class HubSkillTest(unittest.TestCase):
         self.front, self.body = hub_skill()
         self.script = "${CLAUDE_PLUGIN_ROOT}/scripts/hub.py"
 
-    def test_only_status_is_pre_approved(self):
-        # install and remove start and stop containers, so the user sees each one asked for.
-        self.assertEqual(allowed(self.front), [f"python3 {self.script} status"])
+    def test_status_start_and_stop_are_pre_approved(self):
+        # A start undoes a stop. install downloads images and remove deletes the hub's folder,
+        # so the user sees each of those asked for.
+        self.assertEqual(
+            allowed(self.front),
+            [
+                f"python3 {self.script} {command}"
+                for command in ("status", "start", "stop")
+            ],
+        )
+
+    def test_its_argument_hint_names_the_commands(self):
+        hint = next(
+            line
+            for line in self.front.splitlines()
+            if line.startswith("argument-hint:")
+        )
+        self.assertEqual(
+            re.findall(r"[a-z]+", hint.split(":", 1)[1]),
+            ["install", "start", "stop", "status", "remove"],
+        )
+        self.assertIn("`/docs-site:hub stop` runs `stop`", self.body)
 
     def test_every_command_it_names_is_one_hub_py_has(self):
         named = set(re.findall(rf"{re.escape(self.script)} ([a-z]+)", self.body))
-        self.assertEqual(named, {"install", "status", "remove"})
+        self.assertEqual(named, {"install", "start", "stop", "status", "remove"})
         for command in named:
             out = io.StringIO()
             with self.assertRaises(SystemExit) as done, contextlib.redirect_stdout(out):
@@ -111,9 +130,16 @@ class HubSkillTest(unittest.TestCase):
 
     def test_it_says_the_words_hub_py_prints(self):
         source = (PLUGIN / "scripts" / "hub.py").read_text()
-        for words in ["not answering yet", "not answering", "container "]:
+        for words in [
+            "not answering yet",
+            "not answering",
+            "container ",
+            "stopped: ",
+            "no container: ",
+            "the hub is stopped",
+        ]:
+            self.assertIn(words.rstrip(": "), self.body)
             self.assertIn(words, source)
-            self.assertIn(words, self.body)
         self.assertIn("is not running", source)
         self.assertIn('"The docs site for NAME is not running"', self.body)
 
@@ -121,6 +147,8 @@ class HubSkillTest(unittest.TestCase):
         _, body = skill()
         self.assertIn("(`/docs-site:hub`)", body)
         self.assertIn("the hub wasn't updated", body)
+        self.assertIn("`the hub is stopped`", body)
+        self.assertIn("`/docs-site:hub start` serves the site", body)
         self.assertIn(
             "f\"the hub wasn't updated: ",
             (PLUGIN / "scripts" / "scaffold.py").read_text(),
