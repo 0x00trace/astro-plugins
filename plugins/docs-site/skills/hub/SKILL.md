@@ -33,11 +33,11 @@ Tell the user the dashboard's address and each site's.
 
 `install` marks a site `not answering yet`, and `status` says `not answering`, with the container's state. `status` exits 1 when anything isn't answering.
 
-- `container restarting`: `zensical serve` keeps exiting. The usual cause is that the branch checked out in that repo has no `mkdocs.yml`. The site comes back by itself once the file does.
+- `container restarting`: `zensical serve` keeps exiting. The usual cause is that the branch checked out in that repo has no `mkdocs.yml`. The site comes back by itself, within about a minute, once the file does.
 - `container running` but not answering: the first build is still running, or a page failed to build.
 - `container exited`: the repo's folder is gone, so Docker can't start the site. Run `install` again, which drops a repo whose folder is gone. The hub's mounts never create a missing folder: Docker would make it as root where the repo was.
 
-Either way, read the site's log and show the user what it says:
+In each case, read the site's log and show the user what it says:
 
 ```
 docker compose -p docs-site logs site-NAME
