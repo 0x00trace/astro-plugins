@@ -1,10 +1,12 @@
 import contextlib
 import io
 import json
+import subprocess
 import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "board.py"
 sys.path.insert(0, str(SCRIPT.parent))
@@ -557,3 +559,44 @@ class Views(BoardTest):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class RetryTest(unittest.TestCase):
+    def run_gh(self, results):
+        calls, waits = [], []
+
+        def fake_run(args, **kwargs):
+            calls.append(args)
+            code, err = results.pop(0)
+            return subprocess.CompletedProcess(
+                args, code, stdout="ok" if code == 0 else "", stderr=err
+            )
+
+        with (
+            mock.patch.object(board.subprocess, "run", fake_run),
+            mock.patch.object(board.time, "sleep", waits.append),
+        ):
+            try:
+                return board.gh("api", "x"), calls, waits
+            except board.Fail as problem:
+                return problem, calls, waits
+
+    def test_a_transient_error_is_tried_again(self):
+        conflict = "gh: Your attempt to move this item created a temporary conflict. Please try again."
+        out, calls, waits = self.run_gh(
+            [(1, conflict), (1, "HTTP 502: Bad Gateway"), (0, "")]
+        )
+        self.assertEqual(out, "ok")
+        self.assertEqual(len(calls), 3)
+        self.assertEqual(waits, [1, 3])
+
+    def test_it_gives_up_after_three_tries_again(self):
+        out, calls, waits = self.run_gh([(1, "temporary conflict")] * 4)
+        self.assertIsInstance(out, board.Fail)
+        self.assertEqual(len(calls), 4)
+        self.assertEqual(waits, [1, 3, 9])
+
+    def test_any_other_error_fails_at_once(self):
+        out, calls, waits = self.run_gh([(1, "Field validation errors (HTTP 400)")])
+        self.assertEqual(str(out), "Field validation errors (HTTP 400)")
+        self.assertEqual((len(calls), waits), (1, []))
