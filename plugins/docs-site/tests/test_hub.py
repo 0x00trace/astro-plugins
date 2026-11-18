@@ -38,12 +38,12 @@ class FakeDocker:
                 json.dumps({"Service": service, "State": state})
                 for service, state in self.states.items()
             )
-        if rest[:1] == ("up",):
+        if rest[:1] == ("up",) and "--no-start" not in rest:
             self.proxy_running = True
         if rest[:1] == ("exec",) and self.reload_failures:
             self.reload_failures -= 1
             raise hub.Fail("caddy isn't ready")
-        if rest[:1] == ("down",):
+        if rest[:1] in (("down",), ("stop",)):
             self.proxy_running = False
         return ""
 
@@ -473,6 +473,101 @@ class UpdateTest(HubTest):
             ["app: http://app.localhost:8099", "other: http://other.localhost:8099"],
         )
 
+    def test_a_stopped_hub_gets_the_repos_container_and_stays_stopped(self):
+        # /docs-site:init runs update, and starting the hub is for start alone.
+        self.repo("app", 8100)
+        run("install")
+        run("stop")
+        ups = self.docker.ran("up")
+        other = self.repo("other", 8101)
+        code, out, _ = run("update", "--repo", str(other))
+        self.assertEqual(code, 0)
+        self.assertEqual(
+            out,
+            "the hub is stopped: hub.py start serves it at http://other.localhost:8099\n",
+        )
+        self.assertIn("  site-other:", self.read("compose.yml"))
+        self.assertEqual(self.docker.ran("up"), ups + 1)
+        self.assertEqual(
+            self.docker.calls[-1][3:], ("up", "--no-start", "--remove-orphans")
+        )
+        self.assertEqual(self.docker.ran("exec"), 0)
+        self.assertFalse(self.docker.proxy_running)
+
+    def test_a_stopped_hub_without_a_repo_says_it_is_stopped(self):
+        self.repo("app", 8100)
+        run("install")
+        run("stop")
+        _, out, _ = run("update")
+        self.assertEqual(
+            out.splitlines(),
+            [
+                "the hub is stopped: hub.py start starts it",
+                "app: http://app.localhost:8099",
+            ],
+        )
+        self.assertFalse(self.docker.proxy_running)
+
+
+class StartTest(HubTest):
+    def test_with_no_hub_it_refuses_and_runs_nothing(self):
+        # A mistaken start never downloads the images or makes a hub.
+        self.repo("app", 8100)
+        code, out, err = run("start")
+        self.assertEqual((code, out), (1, ""))
+        self.assertEqual(
+            err, "hub.py: the hub isn't installed: hub.py install sets it up\n"
+        )
+        self.assertEqual(self.docker.calls, [])
+        self.assertFalse(self.hub.exists())
+
+    def test_it_starts_a_stopped_hub_on_its_port(self):
+        self.repo("app", 8100)
+        run("install", "--port", "9000")
+        run("stop")
+        code, out, err = run("start")
+        self.assertEqual(code, 0, err)
+        self.assertEqual(self.docker.calls[-1][3:], ("up", "-d", "--remove-orphans"))
+        self.assertTrue(self.docker.proxy_running)
+        self.assertEqual(
+            out.splitlines()[-2:],
+            ["  dashboard: http://localhost:9000", "  app: http://app.localhost:9000"],
+        )
+
+    def test_it_adds_repos_set_up_while_the_hub_was_stopped(self):
+        self.repo("app", 8100)
+        run("install")
+        run("stop")
+        self.repo("other", 8101)
+        _, out, _ = run("start")
+        self.assertIn("  updated compose.yml", out.splitlines())
+        self.assertIn("  other: http://other.localhost:8099", out.splitlines())
+
+
+class StopTest(HubTest):
+    def test_it_stops_every_container_and_says_they_stay_stopped(self):
+        self.repo("app", 8100)
+        run("install")
+        code, out, _ = run("stop")
+        self.assertEqual(code, 0)
+        self.assertEqual(self.docker.calls[-1][3:], ("stop",))
+        self.assertFalse(self.docker.proxy_running)
+        self.assertEqual(
+            out.splitlines(),
+            [
+                f"{self.hub}:",
+                "  stopped the dashboard and every site",
+                "  they stay stopped, through a reboot too, until hub.py start",
+            ],
+        )
+        self.assertTrue((self.hub / "compose.yml").is_file())
+
+    def test_with_no_hub_it_says_so(self):
+        code, out, _ = run("stop")
+        self.assertEqual(code, 0)
+        self.assertIn("  there's no hub to stop", out.splitlines())
+        self.assertEqual(self.docker.calls, [])
+
 
 class StatusTest(HubTest):
     def test_with_no_hub_it_says_how_to_get_one(self):
@@ -501,6 +596,29 @@ class StatusTest(HubTest):
                 "  dashboard: http://localhost:8099  container running, answering",
                 "  app: http://app.localhost:8099  container running, answering",
                 "  other: http://other.localhost:8099  container restarting, not answering (no reply)",
+            ],
+        )
+
+    def test_a_stopped_or_removed_container_says_what_brings_it_back(self):
+        self.repo("app", 8100)
+        self.repo("other", 8101)
+        self.repo("new", 8102)
+        run("install")
+        self.docker.states = {
+            "proxy": "exited",
+            "site-app": "exited",
+            "site-new": "created",
+        }
+        self.down = {"localhost", "app.localhost", "other.localhost", "new.localhost"}
+        code, out, _ = run("status")
+        self.assertEqual(code, 1)
+        self.assertEqual(
+            out.splitlines()[1:],
+            [
+                "  dashboard: http://localhost:8099  stopped: hub.py start starts it",
+                "  app: http://app.localhost:8099  stopped: hub.py start starts it",
+                "  other: http://other.localhost:8099  no container: hub.py start creates it",
+                "  new: http://new.localhost:8099  stopped: hub.py start starts it",
             ],
         )
 
