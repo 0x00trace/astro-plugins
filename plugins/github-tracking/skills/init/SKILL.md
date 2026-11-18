@@ -8,7 +8,7 @@ allowed-tools: Bash(python3 ${CLAUDE_PLUGIN_ROOT}/scripts/board.py *), Bash(gh r
 
 The track skill says how a repo's issues, milestones and Projects board work. This skill gives the repo the board that needs: linked to the repo, with a Status of Todo, In Progress or Done, its views, and the repo's open issues on it. Each step checks what's there and adds only what's missing, so a second run changes nothing.
 
-It makes no labels or milestones. The user's own rules and the repo's say which ones the work needs.
+It makes no labels or milestones. The track skill makes an issue's label when the repo lacks it, and the repo's own rules say which milestones the work needs.
 
 `board.py` makes the board's API calls. It finds the board linked to the repo you're in. Pass `--project NUMBER` when a repo has more than one.
 

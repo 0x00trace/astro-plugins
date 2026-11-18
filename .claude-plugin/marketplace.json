@@ -25,7 +25,7 @@
     {
       "name": "github-tracking",
       "source": "./plugins/github-tracking",
-      "description": "Keeps a repo's GitHub issues, milestones and Projects board true while Claude works: a script moves issues and PRs on the board, makes sub-issues and posts status updates. /github-tracking:init sets up the board and its views, and /github-tracking:migrate moves a repo's corkboard items onto it. Which work gets an issue stays yours to set in your CLAUDE.md."
+      "description": "Keeps a repo's GitHub issues, milestones and Projects board true while Claude works: a script moves issues and PRs on the board, makes sub-issues and posts status updates. /github-tracking:init sets up the board and its views, and /github-tracking:migrate moves a repo's corkboard items onto it. Its track skill says which work gets an issue and how to write one."
     },
     {
       "name": "screen-polish",
