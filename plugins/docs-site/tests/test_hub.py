@@ -145,11 +145,20 @@ class SitesTest(HubTest):
         self.repo("app", 8100, "repo_url: javascript:alert(1)\n")
         self.assertEqual(hub.sites()[0].repo_url, "")
 
-    def test_a_repo_with_no_config_or_home_page_is_still_a_site(self):
+    def test_a_repo_on_a_branch_with_no_config_is_still_a_site(self):
         root = self.repo("app", 8100, config=None)
+        (root / ".git").mkdir()
         (root / "docs" / "index.md").unlink()
         (site,) = hub.sites()
         self.assertEqual((site.name, site.description, site.repo_url), ("app", "", ""))
+
+    def test_an_empty_folder_left_where_a_repo_was_is_no_site(self):
+        self.repo("app", 8100)
+        left = self.tmp / "deleted"
+        left.mkdir()
+        self.ports[str(left)] = 8101
+        self.repo("other", 8102)
+        self.assertEqual([s.name for s in hub.sites()], ["app", "other"])
 
     def test_a_repo_whose_folder_is_gone_is_no_site(self):
         self.repo("app", 8100)
@@ -194,10 +203,14 @@ services:
         source: "/data/hub/caddy"
         target: "/etc/caddy"
         read_only: true
+        bind:
+          create_host_path: false
       - type: bind
         source: "/data/hub/www"
         target: "/srv/hub"
         read_only: true
+        bind:
+          create_host_path: false
     restart: unless-stopped
   site-app:
     image: zensical/zensical:latest
@@ -208,6 +221,8 @@ services:
       - type: bind
         source: "/home/me/app"
         target: "/home/me/app"
+        bind:
+          create_host_path: false
     restart: unless-stopped
 """,
         )
@@ -216,6 +231,12 @@ services:
         text = hub.compose_text([self.site], 8099, Path("/h"), "1:1", False)
         self.assertEqual(text.count("ports:"), 1)
         self.assertNotIn("[::1]", text)
+
+    def test_no_mount_lets_docker_make_a_missing_folder(self):
+        # Docker would make it as root, where a deleted repo was.
+        text = hub.compose_text([self.site], 8099, Path("/h"), "1:1", False)
+        self.assertEqual(text.count("type: bind"), 3)
+        self.assertEqual(text.count("create_host_path: false"), 3)
 
     def test_a_dollar_in_a_path_is_not_a_compose_variable(self):
         site = hub.Site("a", Path("/home/me/a$HOME"), "", "")
