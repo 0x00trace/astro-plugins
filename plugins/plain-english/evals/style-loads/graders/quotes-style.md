@@ -1,4 +1,4 @@
 ---
 type: regex
-pattern: Write the way a good technical writer explains something to a coworker
+pattern: Write in plain language as ISO 24495-1:2023 defines it
 ---
