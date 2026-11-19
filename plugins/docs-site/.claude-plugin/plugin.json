@@ -1,6 +1,6 @@
 {
   "name": "docs-site",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "/docs-site:init sets up a repo's docs site in one script run: a mkdocs.yml with no nav list and the site's own port, a docs home page and the ignore lines, so `uvx zensical serve` shows the Markdown in docs/ with a sidebar, sections and search. /docs-site:hub serves every repo's site at once in Docker, each at http://NAME.localhost:8099, with a dashboard that lists them.",
   "author": {
     "name": "astrosteveo"
