@@ -1,6 +1,6 @@
 # github-tracking
 
-Keeps a repo's GitHub issues, milestones and Projects board true while Claude works, so you can see on GitHub where a project stands instead of asking. Three skills: `/github-tracking:init` sets up a repo's board, `/github-tracking:migrate` moves a repo's corkboard items onto it, and `track` says which work gets an issue and how the board works. Claude loads track in a repo with a GitHub remote before it starts a change, whenever it opens, starts, files or finishes an issue or PR, and when you ask where a project stands. You can also run it as `/github-tracking:track`.
+Keeps a repo's GitHub issues, milestones and Projects board true while Claude works, so you can see on GitHub where a project stands instead of asking. Three skills: `/github-tracking:init` sets up a repo's board, `/github-tracking:migrate` moves a repo's corkboard items onto it, and `track` says which work gets an issue and how the board works. Claude loads track in a repo with a GitHub remote before it starts a change, whenever it opens, starts, files or finishes an issue or PR, and when you ask where a project stands. You can also run it as `/github-tracking:track`, with an operation such as `show` or `file`.
 
 ```
 /plugin install github-tracking --marketplace astrosteveo/astro-plugins
@@ -13,6 +13,24 @@ Keeps a repo's GitHub issues, milestones and Projects board true while Claude wo
 ```
 
 Run it in a repo with a GitHub remote, or ask Claude to set up a board. It makes a Projects board and links it to the repo, gives it its views, checks the board's workflows and puts the open issues on the board. On a repo that already has a board, it adds only what's missing, so running it on an older board gives the board its views. It makes no labels or milestones.
+
+## Show the board and file issues
+
+```
+/github-tracking:track show
+/github-tracking:track file the hub's dashboard lists a removed repo
+```
+
+The first word after `/github-tracking:track` picks the operation:
+
+| Argument | What Claude does |
+| --- | --- |
+| `show` | Says where the project stands: what's in progress, what's next, and anything out of step on the board, with the command that fixes each. |
+| `file DESCRIPTION` | Writes an issue from the description by the track skill's rules, files it, puts it on the board at Todo and gives you its URL. It asks first only when the description doesn't say what's wrong or what to change. |
+| `start ISSUE` | Reads the issue, moves it to In Progress and starts work on it. If another issue is in progress, it asks whether to move that one back to Todo. |
+| `move ITEM STATUS`, `sub PARENT ISSUE...` or `update STATUS [FILE]` | Runs that `board.py` command. `update` with no file has Claude write the status update from the board and the PRs merged since the last one. |
+
+The operation is your request, so Claude doesn't ask again before it changes GitHub. Outside bypass mode, `gh issue create` and `gh label create` still ask for permission, since the skill pre-approves only `board.py`. With no argument, or words that don't start with an operation, Claude does what you asked.
 
 ## Migrate a repo
 

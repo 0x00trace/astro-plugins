@@ -107,6 +107,50 @@ class TrackTest(unittest.TestCase):
         )
         self.assertEqual(named, set(board.UPDATE_STATUSES))
 
+    def operations(self):
+        hint = field(self.front, "argument-hint")
+        return re.findall(r"(?:\[|\| )([a-z]+)", hint)
+
+    def test_it_says_what_it_was_invoked_with(self):
+        # Without the placeholder, Claude Code appends the argument after the last section.
+        self.assertEqual(
+            self.body.count("This skill was invoked with: `$ARGUMENTS`"), 1
+        )
+        self.assertLess(
+            self.body.index("$ARGUMENTS"), self.body.index("## Run it with an argument")
+        )
+
+    def test_each_operation_the_hint_lists_has_a_row(self):
+        self.assertEqual(
+            self.operations(), ["show", "file", "start", "move", "sub", "update"]
+        )
+        section = self.body[
+            self.body.index("## Run it with an argument") : self.body.index(
+                "## Which work gets an issue"
+            )
+        ]
+        rows = [line for line in section.splitlines() if line.startswith("| `")]
+        named = [
+            op for row in rows for op in re.findall(r"`([a-z]+)", row.split("|")[1])
+        ]
+        self.assertEqual(named, self.operations())
+        self.assertIn("first word isn't an operation", section)
+
+    def test_every_operation_but_file_and_start_is_a_board_py_command(self):
+        out = io.StringIO()
+        with self.assertRaises(SystemExit), contextlib.redirect_stdout(out):
+            board.main(["--help"])
+        commands = set(re.search(r"\{([a-z,]+)\}", out.getvalue()).group(1).split(","))
+        self.assertLessEqual(set(self.operations()) - {"file", "start"}, commands)
+
+    def test_it_pre_approves_only_board_py(self):
+        # Claude loads track before every change, so approving gh issue create here would also
+        # cover issues it files without being asked.
+        self.assertEqual(
+            field(self.front, "allowed-tools"),
+            "allowed-tools: Bash(python3 ${CLAUDE_PLUGIN_ROOT}/scripts/board.py *)",
+        )
+
     def test_setting_up_a_board_is_left_to_init(self):
         # Setup runs once per repo; track loads for every change, so it only points the way.
         self.assertIn("/github-tracking:init", field(self.front, "description"))
