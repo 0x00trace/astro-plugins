@@ -28,9 +28,9 @@
       "description": "Makes Claude write plain language as ISO 24495-1 defines it, in a professional, neutral tone, so readers can easily find, understand and use what it writes. An output style for the main conversation and forks, and the same instructions handed to every subagent."
     },
     {
-      "name": "instructions",
-      "source": "./plugins/instructions",
-      "description": "/instructions:init sets up and reviews a project's CLAUDE.md and CLAUDE.local.md and your global ~/.claude/CLAUDE.md. A fork of Claude Code's new /init that checks each file against Claude Code's docs and prompt audit, and shows every draft before writing."
+      "name": "memory",
+      "source": "./plugins/memory",
+      "description": "/memory:init sets up and reviews a project's CLAUDE.md and rules, your CLAUDE.local.md and global ~/.claude/CLAUDE.md, and the memories Claude saves for itself, by the rules in Anthropic's docs. It can also add skills, hooks and permission rules, and writes only what you approve."
     }
   ]
 }

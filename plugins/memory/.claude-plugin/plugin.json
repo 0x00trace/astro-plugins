@@ -1,0 +1,9 @@
+{
+  "name": "memory",
+  "version": "0.1.0",
+  "description": "/memory:init sets up and reviews the files Claude Code loads as memory, by the rules in Anthropic's docs: a project's CLAUDE.md and .claude/rules/, your CLAUDE.local.md and global ~/.claude/CLAUDE.md, and the memories Claude saves for itself. Like /init, it can also add skills, hooks and permission rules. It shows every change first and writes only what you approve.",
+  "author": {
+    "name": "astrosteveo"
+  },
+  "license": "MIT"
+}
