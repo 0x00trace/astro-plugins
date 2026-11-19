@@ -47,8 +47,8 @@ test('the root PROJECT.md joins the instruction files as a project file', async 
   ])
 })
 
-test('it says to raise a request that conflicts with the scope, as the import line did', async () => {
-  expect(LEAD).toContain('If a request conflicts with its non-goals or constraints, say so before starting.')
+test('it asks Claude to point out a request that conflicts with the scope, as the import line did', async () => {
+  expect(LEAD).toContain("If a request conflicts with the project's non-goals or constraints, point this out before starting work.")
 })
 
 test('a repo with no PROJECT.md is left as it was, and nothing is read', async ($, on) => {
