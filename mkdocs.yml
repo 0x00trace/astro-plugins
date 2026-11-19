@@ -9,3 +9,4 @@ theme:
     - navigation.indexes
     - search.highlight
 dev_addr: "127.0.0.1:8100"
+site_dir: .site
