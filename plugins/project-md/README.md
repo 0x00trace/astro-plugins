@@ -42,7 +42,7 @@ What keeps repeated runs quiet:
 The plugin loads PROJECT.md for you, so your CLAUDE.md doesn't need to import it. When a session starts, a hook looks for PROJECT.md at the root of the git repo you're in, or in the session's folder outside a repo. If it's there, the hook adds it to the files Claude Code sends with your first message, the same way it sends CLAUDE.md, and starts it with this line:
 
 ```
-PROJECT.md says what this project is for. If a request conflicts with its non-goals or constraints, say so before starting.
+PROJECT.md provides context for the project. It defines the project's purpose, goals, and any other information that helps Claude understand the project. If a request conflicts with the project's non-goals or constraints, point this out before starting work.
 ```
 
 Claude Code sends the file again after a compaction or `/clear`. With no PROJECT.md, the hook does nothing. If a CLAUDE.md already imports PROJECT.md with `@PROJECT.md`, the hook skips it so it doesn't load twice, and you can delete that line. Since the hook does the loading, PROJECT.md loads only where project-md is installed. Someone who clones the repo without the plugin doesn't get it.
