@@ -29,7 +29,7 @@ Neither skill writes anything until you approve. A review checks the project's s
 
 ## The file
 
-PROJECT.md has these sections, in this order: What it is, The problem, Who it's for, Goals, Non-goals, Success looks like, Failure looks like, Priorities, Constraints, Decisions, Open questions, Glossary and Status. The template, with a note under each heading that explains what the section contains, is in [`skills/init/SKILL.md`](skills/init/SKILL.md) under "Draft PROJECT.md". The template is part of the skill rather than a separate file because Claude Code asks for permission before it reads a file outside the project, and an installed plugin is always outside the project. For the same reason, the review skill keeps its own list of the sections, and a test checks that the two lists match.
+PROJECT.md has these sections, in this order: What it is, The problem, Who it's for, Goals, Non-goals, Success looks like, Failure looks like, Priorities, Constraints, Decisions, Open questions, Glossary and Status. The template, with a note under each heading that explains what the section contains, is in [`skills/init/SKILL.md`](skills/init/SKILL.md) under "Draft PROJECT.md". The template is part of the skill rather than a separate file because Claude Code asks for permission before it reads a file outside the project, and an installed plugin is always outside the project. For the same reason, the review skill keeps its own list of the sections, so a change to the sections goes in both skills.
 
 Repeated reviews do not raise the same findings, for these reasons:
 
