@@ -5,7 +5,7 @@ description: Check a change to one of this repo's plugins in a real Claude Code 
 
 # Try a plugin in a real session
 
-A plugin ships only after it's seen working in a real session (PROJECT.md, Goal 3). Run a second Claude Code session with the plugin loaded in a detached tmux session, drive it with keys and read the screen back. Never drive the user's own session.
+A plugin ships only after it's seen working in a real session. Run a second Claude Code session with the plugin loaded in a detached tmux session, drive it with keys and read the screen back. Never drive the user's own session.
 
 ## Start it
 
