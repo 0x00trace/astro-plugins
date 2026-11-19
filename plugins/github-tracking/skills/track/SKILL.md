@@ -1,10 +1,13 @@
 ---
 name: track
 description: Use in a repo with a GitHub remote before you start a change, before you open, start, file or finish an issue or PR, and before you say where a project stands. Says which work gets an issue and how to write one, how the repo's issues, milestones and GitHub Projects board work, and how its script moves items, makes sub-issues and posts status updates, so the board stays true as you work. When the repo has no board, it offers /github-tracking:init.
+argument-hint: "[show | file DESCRIPTION | start ISSUE | move ITEM STATUS | sub PARENT ISSUE... | update STATUS [FILE]]"
 allowed-tools: Bash(python3 ${CLAUDE_PLUGIN_ROOT}/scripts/board.py *)
 ---
 
 # Track work on GitHub
+
+This skill was invoked with: `$ARGUMENTS`
 
 A repo's work on GitHub is its issues, its milestones, and a Projects board linked to the repo. Each issue and PR on the board has a Status: Todo, In Progress or Done. The user reads the board to see where the project stands, so keep it true as you work. An issue still at In Progress a day after its PR merged misleads them.
 
@@ -16,6 +19,19 @@ python3 ${CLAUDE_PLUGIN_ROOT}/scripts/board.py move 12 "In Progress"   # an issu
 python3 ${CLAUDE_PLUGIN_ROOT}/scripts/board.py sub 10 11 12 13         # 11, 12 and 13 become sub-issues of 10
 python3 ${CLAUDE_PLUGIN_ROOT}/scripts/board.py update on-track FILE    # a status update, its body from FILE or - for stdin
 ```
+
+## Run it with an argument
+
+When the first word of the skill's argument is one of these operations, do what its row says. The argument is the user's request, so don't ask before changing GitHub, except where a row says to.
+
+| Argument | What to do |
+| --- | --- |
+| `show` | Run `board.py show`, and say where the project stands: what's in progress, what's next, and anything `show` marks as out of step, with the command that fixes each. Words after `show` say what to report on. |
+| `file DESCRIPTION` | Write an issue from the description by the rules below, file it with `gh issue create`, put it on the board at Todo with `board.py move`, and give its URL. Ask first only when the description doesn't say what's wrong or what to change. |
+| `start ISSUE` | Read the issue with `gh issue view`, move it to In Progress, and start work on it by the user's own rules for branches and plans. If another issue is in progress, ask whether to move that one back to Todo first. |
+| `move ITEM STATUS`, `sub PARENT ISSUE...` or `update STATUS [FILE]` | Run that command of `board.py` with the rest of the argument. For `update` with no file, write the body from `show` and the PRs merged since the latest status update. |
+
+With no argument, or one whose first word isn't an operation, do what the user asked by the rest of this skill.
 
 ## Which work gets an issue, and how to write one
 
