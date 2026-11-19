@@ -59,10 +59,11 @@ python3 -m unittest discover -s plugins/plain-english/tests
 | `next-step` | What should I do next to get 1.4 out? | starts with the macOS test failure in PR #33 |
 | `merge-today` | Can we merge #33 today? | says no, names `test_write_receipt` and its cause, and says how to fix it |
 
-Each of the nine has an `llm` grader for the right answer, plus eight graders for the style. They live in `evals/style-graders/`, and each case links to them:
+Each of the nine has an `llm` grader for the right answer, plus nine graders for the style. They live in `evals/style-graders/`, and each case links to them:
 
-- Six `regex` graders, one for each word list: hedges, filler, buzzwords, openers and closers, em dashes, and stand-in words such as "land", "carry", "hold up" and "the work". A `regex` grader fails a run on one match in Claude's last message.
+- Six `regex` graders, one for each word list that plain-english 0.2 ruled out: hedges, filler, buzzwords, openers and closers, em dashes, and stand-in words such as "land", "carry", "hold up" and "the work". The style no longer lists these words, but the graders still show whether they come back. A `regex` grader fails a run on one match in Claude's last message.
 - Two `llm` graders, one for each kind of stand-in the word lists can't catch: a metaphor verb ("goes green" for passes) and a cleft sentence ("The next task is what carries the rest of the work").
+- One `llm` grader for a professional, neutral tone. It fails a reply with slang or chatty phrases, jokes, exclamation marks, emoji, flattery, colloquial idioms, or more excitement or alarm than the facts call for.
 
 ```
 mkdir -p "$HOME/.cache/claude-plugin-eval"
@@ -74,7 +75,7 @@ python3 plugins/plain-english/evals/stats.py plugins/plain-english/evals/results
 - `TMPDIR` moves the run folders out of `/tmp`, where the eval sandbox denies Bash writes.
 - `--keep-temp` keeps each run's `trace.jsonl` under `$TMPDIR/claude-eval-*/out/`. The results JSON has the grader verdicts but not Claude's replies, and `stats.py` reads the replies from the traces.
 - `--threshold 0` keeps the exit code at 0, since the run is a measurement, not a gate.
-- `stats.py` counts words, hedges, filler, bold and stand-in words in each reply. A grader passes or fails a whole reply, so the counts show differences between two runs that the graders can't.
+- `stats.py` counts words, hedges, filler, bold, stand-in words, contractions and Markdown headings in each reply. Fewer contractions show a more formal register. A grader passes or fails a whole reply, so the counts show differences between two runs that the graders can't.
 - Add `--model claude-fable-5-2` or another model ID to test the style on that model.
 - With Claude Code 2.1.326, a run of the whole suite costs about $10 on Claude Opus 5.5 and about $20 on Claude Fable 5.2, and takes about 7 minutes on either.
 - Results go to `evals/results/`, which git ignores.
