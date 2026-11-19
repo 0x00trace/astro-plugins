@@ -1,9 +1,0 @@
-{
-  "name": "gates",
-  "version": "0.2.0",
-  "description": "Gates that refuse risky Bash commands (pkill, kill by pattern) and tell Claude why and what to run instead.",
-  "author": {
-    "name": "astrosteveo"
-  },
-  "license": "MIT"
-}

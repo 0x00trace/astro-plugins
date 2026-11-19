@@ -8,29 +8,9 @@
   },
   "plugins": [
     {
-      "name": "inline-thinking",
-      "source": "./plugins/inline-thinking",
-      "description": "Draws Claude's thinking in the chat, above the reply or tool call it led to, in place of the folded \"Thought for 4s\"."
-    },
-    {
-      "name": "gates",
-      "source": "./plugins/gates",
-      "description": "Gates that refuse risky Bash commands (pkill, kill by pattern) and tell Claude why and what to run instead."
-    },
-    {
       "name": "global-memory",
       "source": "./plugins/global-memory",
       "description": "Memories Claude writes for every project, kept in ~/.claude/memory and loaded into each session, and /global-memory, a menu to browse, read and delete them."
-    },
-    {
-      "name": "github-tracking",
-      "source": "./plugins/github-tracking",
-      "description": "Keeps a repo's GitHub issues, milestones and Projects board true while Claude works: a script moves issues and PRs on the board, makes sub-issues and posts status updates. /github-tracking:init sets up the board and its views, and /github-tracking:migrate moves a repo's corkboard items onto it. Its track skill says which work gets an issue and how to write one, and /github-tracking:track show says where the board stands and /github-tracking:track file files an issue."
-    },
-    {
-      "name": "screen-polish",
-      "source": "./plugins/screen-polish",
-      "description": "Polishes Claude Code's terminal: inline code on a background, distinct heading levels, drawn rules, task-list checkboxes and quote bars in replies, plus optional tool-call rows, prompt marker and spinner words. Each turns on or off in /config."
     },
     {
       "name": "bug-hunt",
@@ -46,11 +26,6 @@
       "name": "plain-english",
       "source": "./plugins/plain-english",
       "description": "Makes Claude write plain language as ISO 24495-1 defines it, in a professional, neutral tone, so readers can easily find, understand and use what it writes. An output style for the main conversation and forks, and the same instructions handed to every subagent."
-    },
-    {
-      "name": "docs-site",
-      "source": "./plugins/docs-site",
-      "description": "/docs-site:init sets up a repo's docs site in one script run: a mkdocs.yml with no nav list, a docs home page and site/ in .gitignore, so `uvx zensical serve` shows the Markdown in docs/ with a sidebar, sections and search. /docs-site:hub serves every repo's site at once in Docker, each at http://NAME.localhost:8099, with a dashboard that lists them."
     },
     {
       "name": "instructions",
