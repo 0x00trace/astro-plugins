@@ -1,6 +1,6 @@
 # The track skill takes an operation as its argument
 
-Status: proposed 2026-11-18 · [#169](https://github.com/astrosteveo/astro-plugins/issues/169)
+Status: accepted 2026-11-18 · [#169](https://github.com/astrosteveo/astro-plugins/issues/169)
 
 ## Context
 
