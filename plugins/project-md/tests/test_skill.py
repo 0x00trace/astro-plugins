@@ -162,21 +162,21 @@ class ReviewTest(unittest.TestCase):
         self.assertIn("git log -1 --format='%h %cs' -- :/PROJECT.md", self.body)
 
     def test_answered_findings_are_recorded_so_they_are_not_raised_again(self):
-        self.assertIn("Otherwise the next review raises it again", self.body)
-        self.assertIn("Drop any finding the file already answers", self.body)
+        self.assertIn("Otherwise, the next review will raise it again", self.body)
+        self.assertIn("Leave out any finding that the file already answers", self.body)
 
     def test_status_is_kept_free_of_what_goes_stale_with_each_commit(self):
-        self.assertIn("holds something that changes with every commit", self.body)
+        self.assertIn("contains something that changes with every commit", self.body)
 
     def test_a_new_status_is_rewritten_not_appended(self):
         # A review once added a sentence per change, and Status grew into a log of past work.
         record = step(self.body, "## 3. Record", "## 4.")
         self.assertIn(
-            "A new status rewrites Status as where the project stands now", record
+            "rewrite the Status section to describe the project's current state", record
         )
         self.assertIn("Don't add a line per change", record)
         self.assertIn(
-            "Status that reads as a log of past changes",
+            "A Status section that reads as a log of past changes",
             step(self.body, "## 2. Review", "## 3. Record"),
         )
 
