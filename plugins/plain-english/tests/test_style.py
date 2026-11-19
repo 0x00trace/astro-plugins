@@ -1,3 +1,6 @@
+"""Checks on what Claude Code acts on in the output style: its frontmatter. What the style tells
+Claude to do is checked by running it, with the cases in evals/."""
+
 import unittest
 from pathlib import Path
 
@@ -17,14 +20,6 @@ class StyleTest(unittest.TestCase):
         self.assertEqual(front["force-for-plugin"], "true")
         self.assertEqual(front["keep-coding-instructions"], "true")
         self.assertEqual(front["name"], "Plain English")
-
-    def test_the_instructions_open_with_the_heading_subagents_see(self):
-        _, body = style()
-        self.assertTrue(body.strip().startswith("# Writing style\n"))
-
-    def test_the_instructions_follow_their_own_rule_on_em_dashes(self):
-        _, body = style()
-        self.assertNotIn("—", body)
 
 
 if __name__ == "__main__":
