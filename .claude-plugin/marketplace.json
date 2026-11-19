@@ -40,7 +40,7 @@
     {
       "name": "project-md",
       "source": "./plugins/project-md",
-      "description": "/project-md:init drafts PROJECT.md, a committed document that says what a project is for and what it won't do, and loads it into every session, with no line in CLAUDE.md. Run /project-md:review any time to check the work against it; it changes only what you approve."
+      "description": "Creates PROJECT.md, a committed file that describes a project's purpose and scope, and loads it into every session without an import in CLAUDE.md. Run /project-md:review at any time to compare recent work with the file. It changes the file only with your approval."
     },
     {
       "name": "plain-english",
