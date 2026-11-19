@@ -164,7 +164,7 @@ def compose_text(found: list[Site], port: int, hub: Path, user: str, ipv6: bool)
         lines += [
             f"  {site.service}:",
             f"    image: {ZENSICAL}",
-            # The repo's owner, so the site/ and .cache/ it writes in the repo aren't root's.
+            # The repo's owner, so the built site and .cache/ it writes in the repo aren't root's.
             f"    user: {quoted(user)}",
             f'    command: ["serve", "-a", "0.0.0.0:{INNER}"]',
             f"    working_dir: {quoted(site.root)}",

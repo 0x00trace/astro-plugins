@@ -75,19 +75,20 @@ class NewRepoTest(RepoTest):
             self.read("mkdocs.yml"),
             "site_name: my-project\n"
             "repo_url: https://github.com/someone/my-project\n"
+            "site_dir: .site\n"
             "dev_addr: 127.0.0.1:8100\n" + THEME,
         )
         self.assertEqual(
             self.read("docs/index.md"), "# my-project\n\nTools for my project.\n"
         )
-        self.assertEqual(self.read(".gitignore"), "site/\n.cache/\n")
+        self.assertEqual(self.read(".gitignore"), ".site/\n.cache/\n")
         self.assertEqual(
             out.splitlines(),
             [
                 f"{self.root}:",
                 "  created mkdocs.yml, with dev_addr 127.0.0.1:8100",
                 "  created docs/index.md",
-                "  created .gitignore with site/ and .cache/",
+                "  created .gitignore with .site/ and .cache/",
                 "  uvx zensical serve shows it at http://127.0.0.1:8100",
             ],
         )
@@ -111,8 +112,9 @@ class NewRepoTest(RepoTest):
             [
                 "  kept mkdocs.yml (it exists)",
                 "  kept dev_addr 127.0.0.1:8100 in mkdocs.yml",
+                "  kept site_dir .site in mkdocs.yml",
                 "  kept docs/index.md (it exists)",
-                "  kept .gitignore (it ignores site/ and .cache/)",
+                "  kept .gitignore (it ignores .site/ and .cache/)",
                 "  uvx zensical serve shows it at http://127.0.0.1:8100",
             ],
         )
@@ -174,17 +176,19 @@ class PortTest(RepoTest):
         (self.root / "mkdocs.yml").write_text("site_name: Mine")
         _, out, _ = run(self.root)
         self.assertEqual(
-            self.read("mkdocs.yml"), "site_name: Mine\ndev_addr: 127.0.0.1:8100\n"
+            self.read("mkdocs.yml"),
+            "site_name: Mine\ndev_addr: 127.0.0.1:8100\nsite_dir: .site\n",
         )
         self.assertIn("  added dev_addr 127.0.0.1:8100 to mkdocs.yml", out.splitlines())
 
     def test_a_configs_own_free_port_is_kept_and_recorded(self):
         (self.root / "mkdocs.yml").write_text(
-            "site_name: Mine\ndev_addr: localhost:8500\n"
+            "site_name: Mine\ndev_addr: localhost:8500\nsite_dir: .site\n"
         )
         run(self.root)
         self.assertEqual(
-            self.read("mkdocs.yml"), "site_name: Mine\ndev_addr: localhost:8500\n"
+            self.read("mkdocs.yml"),
+            "site_name: Mine\ndev_addr: localhost:8500\nsite_dir: .site\n",
         )
         self.assertEqual(self.ports(), {str(self.root): 8500})
 
@@ -318,15 +322,14 @@ class InUseTest(unittest.TestCase):
 
 class ExistingFilesTest(RepoTest):
     def test_an_existing_config_is_kept_and_its_docs_dir_used(self):
-        (self.root / "mkdocs.yml").write_text(
-            "site_name: Mine\ndocs_dir: handbook  # pages\ndev_addr: 127.0.0.1:8100\n"
+        config = (
+            "site_name: Mine\ndocs_dir: handbook  # pages\nsite_dir: .site\n"
+            "dev_addr: 127.0.0.1:8100\n"
         )
+        (self.root / "mkdocs.yml").write_text(config)
         code, out, _ = run(self.root)
         self.assertEqual(code, 0)
-        self.assertEqual(
-            self.read("mkdocs.yml"),
-            "site_name: Mine\ndocs_dir: handbook  # pages\ndev_addr: 127.0.0.1:8100\n",
-        )
+        self.assertEqual(self.read("mkdocs.yml"), config)
         self.assertTrue((self.root / "handbook" / "index.md").is_file())
         self.assertFalse((self.root / "docs").exists())
         self.assertIn("  kept mkdocs.yml (it exists)", out.splitlines())
@@ -348,22 +351,70 @@ class ExistingFilesTest(RepoTest):
         (self.root / ".gitignore").write_text("__pycache__/\n.venv")
         _, out, _ = run(self.root)
         self.assertEqual(
-            self.read(".gitignore"), "__pycache__/\n.venv\nsite/\n.cache/\n"
+            self.read(".gitignore"), "__pycache__/\n.venv\n.site/\n.cache/\n"
         )
-        self.assertIn("  added site/ and .cache/ to .gitignore", out.splitlines())
+        self.assertIn("  added .site/ and .cache/ to .gitignore", out.splitlines())
 
     def test_any_form_of_the_ignore_lines_counts(self):
-        for line in ["site", "site/", "/site", "/site/"]:
+        for line in [".site", ".site/", "/.site", "/.site/"]:
             with self.subTest(line):
                 (self.root / ".gitignore").write_text(f"x\n  {line}\n/.cache\n")
                 run(self.root)
                 self.assertEqual(self.read(".gitignore"), f"x\n  {line}\n/.cache\n")
 
-    def test_a_gitignore_with_site_gets_only_the_cache_line(self):
-        (self.root / ".gitignore").write_text("site/\n")
+    def test_a_gitignore_with_the_site_folder_gets_only_the_cache_line(self):
+        (self.root / ".gitignore").write_text(".site/\n")
         _, out, _ = run(self.root)
-        self.assertEqual(self.read(".gitignore"), "site/\n.cache/\n")
+        self.assertEqual(self.read(".gitignore"), ".site/\n.cache/\n")
         self.assertIn("  added .cache/ to .gitignore", out.splitlines())
+
+
+class SiteDirTest(RepoTest):
+    def test_a_config_without_site_dir_gets_the_line_and_its_ignore_line(self):
+        # A repo set up before docs-site built into .site: its old site/ line stays.
+        (self.root / "mkdocs.yml").write_text(
+            "site_name: Mine\ndev_addr: 127.0.0.1:8100\n"
+        )
+        (self.root / ".gitignore").write_text("site/\n.cache/\n")
+        code, out, _ = run(self.root)
+        self.assertEqual(code, 0)
+        self.assertEqual(
+            self.read("mkdocs.yml"),
+            "site_name: Mine\ndev_addr: 127.0.0.1:8100\nsite_dir: .site\n",
+        )
+        self.assertEqual(self.read(".gitignore"), "site/\n.cache/\n.site/\n")
+        self.assertIn("  added site_dir .site to mkdocs.yml", out.splitlines())
+        self.assertIn("  added .site/ to .gitignore", out.splitlines())
+
+    def test_a_configs_own_site_dir_is_kept_and_ignored(self):
+        config = "site_name: Mine\nsite_dir: 'public/'  # built here\n"
+        (self.root / "mkdocs.yml").write_text(config)
+        _, out, _ = run(self.root)
+        self.assertEqual(self.read("mkdocs.yml"), config + "dev_addr: 127.0.0.1:8100\n")
+        self.assertEqual(self.read(".gitignore"), "public/\n.cache/\n")
+        self.assertIn("  kept site_dir public/ in mkdocs.yml", out.splitlines())
+
+    def test_a_zensical_toml_without_site_dir_is_left_alone_and_named(self):
+        (self.root / "zensical.toml").write_text(
+            '[project]\ndev_addr = "127.0.0.1:8100"\n'
+        )
+        _, out, _ = run(self.root)
+        self.assertEqual(
+            self.read("zensical.toml"), '[project]\ndev_addr = "127.0.0.1:8100"\n'
+        )
+        self.assertIn(
+            '  zensical.toml has no site_dir: add site_dir = ".site" under [project]',
+            out.splitlines(),
+        )
+        self.assertEqual(self.read(".gitignore"), ".site/\n.cache/\n")
+
+    def test_a_zensical_toml_with_site_dir_keeps_it(self):
+        (self.root / "zensical.toml").write_text(
+            '[project]\nsite_dir = ".site"\ndev_addr = "127.0.0.1:8100"\n'
+        )
+        _, out, _ = run(self.root)
+        self.assertIn("  kept site_dir .site in zensical.toml", out.splitlines())
+        self.assertNotIn("has no site_dir", out)
 
 
 class DocsDirTest(RepoTest):
@@ -374,7 +425,7 @@ class DocsDirTest(RepoTest):
         self.assertEqual(code, 0)
         self.assertEqual(
             self.read("mkdocs.yml"),
-            "site_name: my-project\ndocs_dir: .project/docs\n"
+            "site_name: my-project\ndocs_dir: .project/docs\nsite_dir: .site\n"
             "dev_addr: 127.0.0.1:8100\n" + THEME,
         )
         self.assertEqual(self.read(".project/docs/index.md"), "# my-project\n")
