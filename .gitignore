@@ -1,5 +1,3 @@
 __pycache__/
 plugins/*/tsconfig.json
 .claude/worktrees/
-.site/
-.cache/
