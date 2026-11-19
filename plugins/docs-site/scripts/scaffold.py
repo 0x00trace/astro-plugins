@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
-"""Set up a repo's docs site for Zensical: mkdocs.yml, the docs home page and site/ in .gitignore.
+"""Set up a repo's docs site for Zensical: mkdocs.yml, the docs home page and .site/ in .gitignore.
 
 The same repo always gets the same files, and a file that already exists is kept, so a second run
 changes nothing. The config has no nav list, so every page in the docs folder shows in the sidebar
 without a config change. Each repo's site gets its own port, written as dev_addr, from a record of
-the ports handed out on this machine, so any number of sites can be served at once. Stdlib only,
+the ports handed out on this machine, so any number of sites can be served at once. The site is
+built into the hidden .site folder, written as site_dir, so it sorts with the repo's other dot
+folders and tools that skip hidden folders, such as the Godot editor, leave it alone. Stdlib only,
 for Python 3.11 and later.
 """
 
@@ -36,6 +38,12 @@ HTTPS = re.compile(r"^https://(?:[^@/]+@)?([^/]+/.+?)(?:\.git)?/?$")
 DOCS_DIR = re.compile(
     r"""^\s*docs_dir\s*[:=]\s*["']?([^"'#\n]+?)["']?\s*(?:#.*)?$""", re.MULTILINE
 )
+# site_dir in an existing mkdocs.yml (site_dir: x) or zensical.toml (site_dir = "x").
+SITE_DIR = re.compile(
+    r"""^\s*site_dir\s*[:=]\s*["']?([^"'#\n]+?)["']?\s*(?:#.*)?$""", re.MULTILINE
+)
+# The folder the site is built into: hidden, so it sorts with the other dot folders.
+SITE = ".site"
 THEME = """theme:
   name: material
   palette:
@@ -117,6 +125,7 @@ def config(name: str, url: str | None, docs_dir: str, port: int) -> str:
         lines.append(f"repo_url: {scalar(url)}")
     if docs_dir != "docs":
         lines.append(f"docs_dir: {scalar(docs_dir)}")
+    lines.append(f"site_dir: {scalar(SITE)}")
     lines.append(f"dev_addr: {scalar(f'{HOST}:{port}')}")
     return "\n".join(lines) + "\n" + THEME
 
@@ -210,6 +219,25 @@ def port_in_config(
     return port
 
 
+def site_in_config(path: Path, report: list[str]) -> str:
+    """The folder an existing config builds the site into, adding site_dir: .site if it has none."""
+    text = path.read_text()
+    if found := SITE_DIR.search(text):
+        site_dir = found.group(1).strip()
+        report.append(f"kept site_dir {site_dir} in {path.name}")
+        return site_dir
+    if path.suffix == ".toml":
+        report.append(
+            f'{path.name} has no site_dir: add site_dir = "{SITE}" under [project]'
+        )
+    else:
+        if text and not text.endswith("\n"):
+            text += "\n"
+        path.write_text(text + f"site_dir: {scalar(SITE)}\n")
+        report.append(f"added site_dir {SITE} to {path.name}")
+    return SITE
+
+
 def home(name: str, description: str | None) -> str:
     text = f"# {name}\n"
     if description:
@@ -281,8 +309,10 @@ def scaffold(
     docs_dir = inside(root, docs_dir or "docs")
     if existing:
         port = port_in_config(root / existing, text, key, ports, report)
+        site_dir = site_in_config(root / existing, report)
     else:
         port = pick_port(key, ports, None)
+        site_dir = SITE
         (root / "mkdocs.yml").write_text(config(name, repo_url(root), docs_dir, port))
         report.append(f"created mkdocs.yml, with dev_addr {HOST}:{port}")
     if ports.get(key) != port:
@@ -300,10 +330,11 @@ def scaffold(
     ignore = root / ".gitignore"
     text = ignore.read_text() if ignore.is_file() else ""
     have = {line.strip().strip("/") for line in text.splitlines()}
-    # Zensical builds the site into site/ and keeps a cache in .cache/.
-    missing = [x for x in ("site/", ".cache/") if x.strip("/") not in have]
+    # Zensical builds the site into site_dir and keeps a cache in .cache/.
+    wanted = (f"{site_dir.strip('/')}/", ".cache/")
+    missing = [x for x in wanted if x.strip("/") not in have]
     if not missing:
-        report.append("kept .gitignore (it ignores site/ and .cache/)")
+        report.append(f"kept .gitignore (it ignores {wanted[0]} and .cache/)")
     else:
         if text and not text.endswith("\n"):
             text += "\n"

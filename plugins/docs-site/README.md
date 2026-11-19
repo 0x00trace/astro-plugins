@@ -16,9 +16,11 @@ Run it in any repo, or ask Claude to set up a docs site. A script writes three t
 
 | File | What it holds |
 | --- | --- |
-| `mkdocs.yml` | The site's name (the repo's folder), its URL from the `origin` remote, its own port as `dev_addr`, and the theme. It has no `nav` list, so every page in the docs folder shows in the sidebar, titled by its `#` heading, with no change to the config. |
+| `mkdocs.yml` | The site's name (the repo's folder), its URL from the `origin` remote, its own port as `dev_addr`, the hidden `.site` folder it builds into as `site_dir`, and the theme. It has no `nav` list, so every page in the docs folder shows in the sidebar, titled by its `#` heading, with no change to the config. |
 | `docs/index.md` | The home page: the site's name as its heading, and a line from the README or PROJECT.md that says what the project is. |
-| `.gitignore` | `site/` and `.cache/` lines, for the built site and Zensical's cache. A tool that doesn't read `.gitignore`, such as ESLint's flat config, needs both in its own ignores. |
+| `.gitignore` | `.site/` and `.cache/` lines, for the built site and Zensical's cache. A tool that doesn't read `.gitignore`, such as ESLint's flat config, needs both in its own ignores. |
+
+The built site goes in `.site/` rather than Zensical's default, `site/`. A hidden folder sorts with the repo's other dot folders, and tools that skip hidden folders, such as the Godot editor, don't import it. In a repo set up before this, a second run adds `site_dir: .site` and the `.site/` line; the old `site/` line and folder can then be deleted. A config that sets its own `site_dir` keeps it.
 
 Then Claude builds the site once with `uvx zensical build` to check it, and tells you what it created. It makes no other folders or pages, adds no GitHub Pages workflow, and commits nothing.
 
