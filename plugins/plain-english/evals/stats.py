@@ -1,4 +1,4 @@
-"""Count words, hedges, filler and bold in each reply of a `claude plugin eval` run.
+"""Count words, hedges, filler, bold, contractions and headings in each reply of a `claude plugin eval` run.
 
 The eval's regex graders pass or fail a reply on one match. This counts the matches, which shows a
 difference between two runs that both pass every grader. It reads the replies from each run's
@@ -38,7 +38,23 @@ STAND_INS = re.compile(
     r"|\bthe (rest of the |remaining )?work\b|\b(is|are|was) what\b",
     re.IGNORECASE,
 )
-COLUMNS = ("runs", "words", "hedges", "hedge-like", "filler", "bold", "stand-ins")
+# Contractions such as "don't" and "it's": fewer of them reads as a more formal register.
+CONTRACTIONS = re.compile(
+    r"\b\w+(n['’]t|['’](re|ve|ll|d|m))\b|\b(it|that|there|here|what|who|let)['’]s\b",
+    re.IGNORECASE,
+)
+HEADINGS = re.compile(r"^#{1,6} ", re.MULTILINE)
+COLUMNS = (
+    "runs",
+    "words",
+    "hedges",
+    "hedge-like",
+    "filler",
+    "bold",
+    "stand-ins",
+    "contractions",
+    "headings",
+)
 
 
 def final_reply(trace_path):
@@ -65,6 +81,8 @@ def counts(replies):
         sum(len(FILLER.findall(r)) for r in replies),
         sum(r.count("**") // 2 for r in replies),
         sum(len(STAND_INS.findall(r)) for r in replies),
+        sum(len(CONTRACTIONS.findall(r)) for r in replies),
+        sum(len(HEADINGS.findall(r)) for r in replies),
     )
 
 
@@ -82,9 +100,9 @@ def main(path):
                 rows.append((case["name"], arm, counts(replies)))
                 every.setdefault(arm, []).extend(replies)
     rows += [("all", arm, counts(replies)) for arm, replies in every.items()]
-    print(f"{'case':16}{'arm':9}" + "".join(f"{c:>11}" for c in COLUMNS))
+    print(f"{'case':16}{'arm':9}" + "".join(f"{c:>13}" for c in COLUMNS))
     for name, arm, row in rows:
-        print(f"{name:16}{arm:9}" + "".join(f"{v:>11}" for v in row))
+        print(f"{name:16}{arm:9}" + "".join(f"{v:>13}" for v in row))
     print("\nwords is the mean per reply; the other counts are totals over the runs.")
     if missing:
         print(
