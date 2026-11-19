@@ -1,6 +1,6 @@
 {
   "name": "project-md",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Creates and maintains PROJECT.md, a committed file that describes a project's purpose, goals, non-goals and constraints. /project-md:init drafts the file, and /project-md:review compares it with recent changes and edits it only with your approval. The plugin loads PROJECT.md into every session, so CLAUDE.md does not need to import it.",
   "author": {
     "name": "astrosteveo"
