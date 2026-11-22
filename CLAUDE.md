@@ -18,8 +18,3 @@
 
 - Installs get a change only after the plugin's version goes up. Finish the work with a commit that changes only `"version"` in `plugins/<name>/.claude-plugin/plugin.json`, with the subject `chore(<name>): release X.Y.Z so installs get <what changed>`. Raise the patch number for a fix or a wording change, and the minor number for new behavior.
 - `.claude-plugin/marketplace.json` has no versions. Change it only to add or remove a plugin.
-
-## Docs
-
-- Read the Decisions in the "astro-plugins" Outline collection before you change how a plugin works.
-- Record what an experiment or eval found as a note under Notes.
