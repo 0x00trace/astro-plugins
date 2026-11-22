@@ -47,8 +47,8 @@ These are the user's rules in every repo. Where a repo's own rules say otherwise
     1. `### Problem`: what's wrong or missing, and the evidence: where it was found (link the issue or PR), the command and its output, or the numbers.
     2. `### Goal`: what to change, in a sentence or two, as the result the user gets. Leave how to build it to the plan unless the cause is already known.
     3. `### Acceptance criteria`: a checklist (`- [ ]`). Each item is one result that will be true when the issue is done, that someone can check as pass or fail, and that says how to check it: a named test, a command and the output it prints, or a screenshot. Give numbers for speed, size or counts. Include what must stay as it is when the change could break it. Describe the result, not how it's built.
-    4. `### Open questions`: questions the plan has to answer, if any. When an answer changes what the issue delivers, update the criteria in the issue.
   - When a repo's issue form has other sections, such as Steps to reproduce, keep them after Problem.
+  - When the work changes what the issue delivers, update its Goal and criteria in the issue.
   - Tick each criterion in the issue once you've checked it, before the PR that closes the issue merges.
   - A trivial issue can cover Problem and Goal in one sentence each, with one criterion.
 

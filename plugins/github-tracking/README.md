@@ -68,7 +68,7 @@ It also carries the author's rules for issues, which hold in every repo unless t
 
 - Every change Claude commits gets an issue, except a trivial fix, and the issue moves to In Progress when the work starts. One issue is in progress at a time.
 - Work Claude finds along the way gets its own issue instead of growing the current change.
-- An issue's title is the commit scope and what to change, in lowercase, and its commit type is a label. Its body has Problem, Goal, Acceptance criteria and Open questions, so someone who wasn't in the conversation can start on it.
+- An issue's title is the commit scope and what to change, in lowercase, and its commit type is a label. Its body has Problem, Goal and Acceptance criteria, so someone who wasn't in the conversation can start on it.
 - A PR's body says `Closes #N` for each issue it finishes, and each criterion is ticked before the PR merges.
 
 Branches, commits, merges and status updates stay yours to set in your own CLAUDE.md and the repo's rules. Claude loads skills by their descriptions, so to have it load track before every change, add a line like this to your CLAUDE.md:
