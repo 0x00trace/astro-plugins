@@ -557,10 +557,6 @@ class Views(BoardTest):
         self.assertEqual(fake.mutations("deleteProjectV2View"), [])
 
 
-if __name__ == "__main__":
-    unittest.main()
-
-
 class RetryTest(unittest.TestCase):
     def run_gh(self, results):
         calls, waits = [], []
@@ -600,3 +596,7 @@ class RetryTest(unittest.TestCase):
         out, calls, waits = self.run_gh([(1, "Field validation errors (HTTP 400)")])
         self.assertEqual(str(out), "Field validation errors (HTTP 400)")
         self.assertEqual((len(calls), waits), (1, []))
+
+
+if __name__ == "__main__":
+    unittest.main()
