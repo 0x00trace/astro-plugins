@@ -2,7 +2,7 @@
 
 ## Checking a change
 
-- Python tests (bug-hunt, memory, plain-english, project-md): `python3 -m unittest discover -s plugins/<name>/tests`. To run one file, use `python3 plugins/<name>/tests/<file>.py`: the tests folders aren't packages, so a dotted module path fails.
+- Python tests (bug-hunt, github-tracking, memory, plain-english, project-md): `python3 -m unittest discover -s plugins/<name>/tests`. To run one file, use `python3 plugins/<name>/tests/<file>.py`: the tests folders aren't packages, so a dotted module path fails.
 - TypeScript tests (global-memory, plain-english, project-md): `claude plugin test plugins/<name>`. Validate every plugin with `claude plugin validate plugins/<name>`.
 - Don't run `unittest discover` over all of `plugins/`: it also finds the eval fixtures' tests, and some fail on purpose.
 - Check what a skill does by running it, with the try-plugin skill or the plugin's evals. Unit tests cover only the scripts a skill ships.
