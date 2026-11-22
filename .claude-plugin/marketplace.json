@@ -13,6 +13,11 @@
       "description": "Memories Claude writes for every project, kept in ~/.claude/memory and loaded into each session, and /global-memory, a menu to browse, read and delete them."
     },
     {
+      "name": "github-tracking",
+      "source": "./plugins/github-tracking",
+      "description": "Keeps a repo's GitHub issues, milestones and Projects board true while Claude works: a script moves issues and PRs on the board, makes sub-issues and posts status updates. /github-tracking:init sets up the board and its views, and /github-tracking:migrate moves a repo's corkboard items onto it. Its track skill says which work gets an issue and how to write one, and /github-tracking:track show says where the board stands and /github-tracking:track file files an issue."
+    },
+    {
       "name": "bug-hunt",
       "source": "./plugins/bug-hunt",
       "description": "/bug-hunt:hunt finds bugs and reproduces each one before calling it a bug: a whole codebase component by component, a path or area, or a change that Claude Code's /code-review reviews first."
