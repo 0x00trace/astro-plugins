@@ -14,6 +14,7 @@ Makes Claude write plain language as [ISO 24495-1:2023](https://www.iso.org/stan
 | A fork (`subagent_type: fork`) | The output style, in the system prompt the fork inherits |
 | Every other subagent: Explore, Plan, general-purpose, a plugin's agents, workflow agents | The same text as `SubagentStart` context, from the hooks module |
 | An agent-team teammate | Both: its lead's system prompt and `SubagentStart` context |
+| A commit message, pull request, issue, review, comment or release text written with Bash | A `tool.call` hook that refuses a figure of speech from its list (see below) |
 
 A subagent other than a fork runs on its own system prompt, which leaves out the output style. That's why the hook hands it the text. A teammate gets it twice, because the hook names a teammate by the name it was given and can't tell it apart from a subagent.
 
@@ -22,6 +23,18 @@ A subagent other than a fork runs on its own system prompt, which leaves out the
 While the plugin is enabled, Plain English replaces any output style you pick in `/config` or with `/output-style`. To go back to another style, disable the plugin. The style keeps Claude Code's software engineering instructions (`keep-coding-instructions: true`).
 
 Claude Code reads output style files when it starts, so after editing `plain-english.md`, restart Claude Code. Subagents read the file each time one starts.
+
+## The check on commit messages and GitHub text
+
+The hooks module also checks each Bash command that writes text other people read later: `git commit` and `git tag`; `gh pr create`, `edit`, `comment` and `review`; `gh issue create`, `edit` and `comment`; `gh release create` and `edit`; and `gh api` with fields or a body. When the text uses a figure of speech from the list in [`hooks/literal-words.ts`](hooks/literal-words.ts), such as "lands" for "is merged" or "CI is green" for "the tests pass", the hook refuses the command and names the literal words to write. Claude then rewrites the text and runs the command again.
+
+- The hook checks the command itself, heredocs included, and each file the command reads its text from: `-F`, `--file`, `--body-file`, `--notes-file`, or a field given as `name=@file`. A relative path is read from the session's directory.
+- It doesn't check code: fenced blocks, text in backticks, paths and URLs. To use a listed word as the name of a thing, or to quote the word itself, put it in backticks.
+- The list leaves out words that are literal in common projects, such as "ship" on its own (a spaceship in a game) and "seamless loop" (audio).
+- It checks the whole command, so a command that only mentions `git commit` in an argument, such as a prompt passed to `claude -p`, is checked too. Pass such text through a file or standard input.
+- If the check fails, the command runs as it would without the plugin.
+
+The style itself still has no word lists. The list applies only to text that stays in a project's history, where a reader can't ask what a figure meant.
 
 ## Check it
 

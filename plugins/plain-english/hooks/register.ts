@@ -1,4 +1,5 @@
 import type { EngineInterface, Register } from 'claude-code'
+import { figures, refusal, textFiles, writesText } from './literal-words'
 
 // The output style's file, so the main conversation and the subagents read the same text.
 export const STYLE = 'output-styles/plain-english.md'
@@ -26,4 +27,21 @@ export const register: Register = on => {
     if (!style) return below
     return { ...below, additionalContext: [...(below.additionalContext ?? []), style] }
   })
+
+  // A commit message, pull request or issue stays in a project's history, where other people read
+  // it. A Bash command that writes one with a figure of speech is refused, with the literal words to
+  // write, so Claude rewrites the text and runs the command again. The text is the command itself,
+  // heredocs included, and each file the command reads its message or body from. If the check
+  // fails, the command runs as it would without the plugin.
+  on('tool.call', { tool: 'Bash' }, async ($, e, next) => {
+    if (!writesText(e.command)) return next(e)
+    const texts = [e.command]
+    for (const path of textFiles(e.command)) {
+      const full = path.startsWith('/') ? path : `${await $.session.cwd()}/${path}`
+      const text = await $.fs.read(full).catch(() => undefined)
+      if (text !== undefined) texts.push(text)
+    }
+    const found = figures(texts.join('\n'))
+    return found.size ? { deny: refusal(found) } : next(e)
+  }).catch(($, e, next) => next(e))
 }
