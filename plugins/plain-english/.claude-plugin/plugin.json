@@ -1,7 +1,7 @@
 {
   "name": "plain-english",
   "version": "0.3.1",
-  "description": "Makes Claude write plain language as ISO 24495-1 defines it, in a professional, neutral tone, so readers can easily find, understand and use what it writes. An output style for the main conversation and forks, and the same instructions handed to every subagent.",
+  "description": "Makes Claude write plain language as ISO 24495-1 defines it, in a professional, neutral tone, so readers can easily find, understand and use what it writes. An output style for the main conversation and forks, the same instructions handed to every subagent, and a hook that refuses commit messages and GitHub text with figures of speech.",
   "author": {
     "name": "astrosteveo"
   },
